@@ -9,6 +9,8 @@ pandas = "*"
 numpy = "==1.19.3"
 xlrd = "*"
 pyinstaller = "*"
+xlsxwriter = "*"
+pillow = "*"
 
 [dev-packages]
 
