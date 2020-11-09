@@ -1,6 +1,8 @@
 ## install driver
+- [chrome driver install](https://blog.csdn.net/n123456uo/article/details/91412740)
 
 ## usage
+- [详细使用参考](https://blog.csdn.net/weixin_36279318/article/details/79475388): 截图,按键事件,回退,tab切换等等
 - 无头chrome,但是会被反爬虫 403 forbidden
 - 打开新的tab后, 必须要切换tab, 否则无法找到想要的element
 ```python

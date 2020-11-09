@@ -3,13 +3,14 @@
 import os
 import time
 from platform import system
+
+import pandas
 from selenium import webdriver, common
 from PIL import Image
 
 
 class Chrome:
-    root = ''
-    chrome = None
+    __driver = None
 
     # 初始化, 并加载 天眼查根目录
     def __init__(self, url):
@@ -18,44 +19,48 @@ class Chrome:
         if driver_location is None:
             print('不支持的系统类型！')
             exit(-1)
-        self.chrome = webdriver.Chrome(driver_location)
-        self.chrome.implicitly_wait(3)
-        self.chrome.get(url)
+        self.__driver = webdriver.Chrome(driver_location)
+        self.__driver.get(url)
+        self.__driver.implicitly_wait(5)
 
-    def save_pic(self, company):
+    def save_pic(self, pic_root_dir, company):
         company_code = company[1]
         company_name = company[2]
         company_address = company[3]
 
-        # 切换到第一个tab
-        self.chrome.switch_to.window(self.chrome.window_handles[0])
-        self.chrome.get("https://www.tianyancha.com/search?key={value}".format(value=company_address))
-        # self.chrome.find_element_by_css_selector('input[type=search]').send_keys(company_address)
-        print(self.chrome.page_source)
-        self.chrome.find_element_by_css_selector('.input-group-btn').click()
+        self.__driver.get("https://www.tianyancha.com/search?key={value}".format(value=company_name))
         # 获取第一条记录的公司的超链接
-        company_url = self.chrome.find_element_by_css_selector('.name,.select-none').get_attribute('href')
-        self.chrome.get(company_url)
-        # self.chrome.find_element_by_css_selector('.name,.select-none').click()
-        # 切换到新tab
-        # self.chrome.switch_to.window(self.chrome.window_handles[1])
-        
-        detail_address = self.chrome.find_element_by_css_selector('.detail-content').text
-        
-        # 最终保存的图片路径
+        company_url = self.__driver.find_element_by_css_selector('.name,.select-none').get_attribute('href')
+        self.__driver.get(company_url)
+        detail_address = self.__driver.find_element_by_css_selector('.detail-content').text
+        detail_element = self.__driver.find_element_by_css_selector('.box > .content')
+        location = detail_element.location
+        size = detail_element.size
+        left = location['x']
+        top = location['y']
+        right = left + size['width']
+        bottom = top + size['height']
+        rect = (left, top, right, bottom)
         saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
-        self.chrome.save_screenshot(saved_image_path)
+        # 最终保存的图片路径
+        saved_image_path = os.path.join(pic_root_dir, saved_image_path)
+        self.__driver.save_screenshot(saved_image_path)
         try:
             im = Image.open(saved_image_path)
-            im.crop(0, 0, 100, 100)
-            im.save(saved_image_path)
+            cropped_image = im.crop(rect)
+            cropped_image.save(saved_image_path)
         except OSError:
             print(OSError.strerror)
-        self.chrome.close()
+        same = True
+        if company_address != detail_address:
+            same = False
+        ret_company = company
+        ret_company = pandas.np.append(ret_company, same)
+        return ret_company
         
     def quit(self):
         # quit Chrome browser
-        self.chrome.quit()
+        self.__driver.quit()
 
     @staticmethod
     def get_driver():

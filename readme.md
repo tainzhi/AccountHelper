@@ -47,3 +47,16 @@ http://mirrors.aliyun.com/pypi/simple/
 - [python 4种截屏方法](https://www.jb51.net/article/168609.htm)
 - [selenium反爬虫](https://blog.csdn.net/weixin_44685869/article/details/105602629?utm_medium=distribute.pc_relevant.none-task-blog-title-3&spm=1001.2101.3001.4242)
 - [python selenium指定元素截长图](https://cloud.tencent.com/developer/article/1406656)
+- [python class]
+- [python string format](https://www.runoob.com/python/att-string-format.html)
+```python
+>>>"{} {}".format("hello", "world")    # 不设置指定位置，按默认顺序
+'hello world'
+ 
+>>> "{0} {1}".format("hello", "world")  # 设置指定位置
+'hello world'
+ 
+>>> "{1} {0} {1}".format("hello", "world")  # 设置指定位置
+'world hello world'
+print("网站名：{name}, 地址 {url}".format(name="菜鸟教程", url="www.runoob.com"))
+```
