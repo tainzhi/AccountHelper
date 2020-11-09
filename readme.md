@@ -33,9 +33,17 @@ http://mirrors.aliyun.com/pypi/simple/
 - 企查查多线程操作, 登录使用cookie
 - python async
 - python多线程线程池
+- 扫描二维码, 保留cookie,[参考](https://github.com/tychxn/jd-assistant/blob/master/main.py)
+- 添加gui支持
+
+##　包选择
+- 截屏
+- 裁剪图片Pillow是PIL的分支版
+- 
 
 ## python 4中截屏方法
 - [python class](https://www.runoob.com/python3/python3-class.html): Selenium支持跨平台(win10/mac)
 - [python multi thread](https://www.runoob.com/python3/python3-multithreading.html)
 - [python 4种截屏方法](https://www.jb51.net/article/168609.htm)
 - [selenium反爬虫](https://blog.csdn.net/weixin_44685869/article/details/105602629?utm_medium=distribute.pc_relevant.none-task-blog-title-3&spm=1001.2101.3001.4242)
+- [python selenium指定元素截长图](https://cloud.tencent.com/developer/article/1406656)
