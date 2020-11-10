@@ -12,7 +12,7 @@ class Chrome:
     __driver = None
 
     # 初始化, 并加载 天眼查根目录
-    def __init__(self, driver_location, url):
+    def __init__(self, driver_location, url, cookie_location=None):
         self.__driver = webdriver.Chrome(driver_location)
         self.__driver.get(url)
         self.__driver.implicitly_wait(5)
@@ -69,12 +69,12 @@ class Chrome:
         # 最终保存的图片路径
         saved_image_path = os.path.join(pic_root_dir, saved_image_path)
         self.__driver.save_screenshot(saved_image_path)
-        try:
-            im = Image.open(saved_image_path)
-            cropped_image = im.crop(rect)
-            cropped_image.save(saved_image_path)
-        except OSError:
-            print(OSError.strerror)
+        # try:
+        #     im = Image.open(saved_image_path)
+        #     cropped_image = im.crop(rect)
+        #     cropped_image.save(saved_image_path)
+        # except OSError:
+        #     print(OSError.strerror)
         same_ratio = '{:.3f}'.format(SequenceMatcher(None, company_address, detail_address).ratio())
         ret_company = numpy.append(company, [detail_address, same_ratio])
         return ret_company

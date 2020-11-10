@@ -38,7 +38,7 @@ def read_excel(excel):
     """
     read = pd.read_excel(excel)
     # 从第2行开始， 获取每行的每列
-    data = read.iloc[2:-1, 0:-1]
+    data = read.iloc[2:, 0:]
     # print("获取到所有的值:\n{0}".format(data))  # 格式化输出
     return data.values
 
@@ -49,7 +49,15 @@ def get_save_png_dir():
     if not os.path.exists(base_dir):
         os.makedirs(base_dir)
     return os.path.join(root_dir, base_dir)
-    
+
+
+def get_cookie():
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = 'cookie'
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
+    return os.path.join(root_dir, base_dir)
+
 
 def write_excel(companies):
     root_dir = os.path.dirname(os.path.abspath(__file__))

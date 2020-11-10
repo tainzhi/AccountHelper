@@ -33,11 +33,12 @@ http://mirrors.aliyun.com/pypi/simple/
 
 
 ## Todo
+- 扫描二维码, 保留cookie,[参考](https://github.com/tychxn/jd-assistant/blob/master/main.py)
+- [添加log， 记录执行记录和错误到文件](https://blog.csdn.net/zywvvd/article/details/87857816)
 - [添加执行icon和管理员权限盾牌](https://blog.csdn.net/laiyaoditude/article/details/85278037)
 - 企查查多线程操作, 登录使用cookie
 - python async
 - python多线程线程池
-- 扫描二维码, 保留cookie,[参考](https://github.com/tychxn/jd-assistant/blob/master/main.py)
 - 添加gui支持
 
 ##　包选择
