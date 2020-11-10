@@ -11,6 +11,8 @@ xlrd = "*"
 pyinstaller = "*"
 xlsxwriter = "*"
 pillow = "*"
+pathlib = "*"
+pysimplegui = "*"
 
 [dev-packages]
 

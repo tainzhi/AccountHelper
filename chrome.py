@@ -16,6 +16,30 @@ class Chrome:
         self.__driver = webdriver.Chrome(driver_location)
         self.__driver.get(url)
         self.__driver.implicitly_wait(5)
+        self.login()
+
+    def login(self):
+        # 我在开发的时候， 刚好在双十一， 一进入该页面， 会弹出一个促销dialog， 故需要close
+        try:
+            self.__driver.find_element_by_css_selector('.modal-close').click()
+        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException, common.exceptions.ElementNotInteractableException):
+            print("no ad dialog")
+        # 点击登录
+        self.__driver.find_element_by_css_selector("[onclick='header.loginLink(event)']").click()
+        # 循环直到登录成功
+        while True:
+            try:
+                self.__driver.find_element_by_css_selector('.scan-title').text != '手机扫码登录'
+            except (common.exceptions.NoSuchElementException,
+                    common.exceptions.ElementNotInteractableException,
+                    common.exceptions.ElementNotInteractableException,
+                    common.exceptions.StaleElementReferenceException
+                    ):
+                break
+            time.sleep(1)
+            print("请扫码登录")
+        cookie = self.__driver.get_cookies()
+        print(cookie)
 
     def save_pic(self, pic_root_dir, company):
         """

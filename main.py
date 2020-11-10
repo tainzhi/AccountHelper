@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from platform import system
-import chrome
+from chrome import Chrome
 
 
 def select_excel():
@@ -82,7 +82,7 @@ def get_driver_location():
 if __name__ == "__main__":
     excel = select_excel()
     companies = read_excel(excel)
-    chrome = chrome.Chrome(get_driver_location(), 'https://www.tianyancha.com/')
+    chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/')
     processed = []
     all_count = len(companies)
     index = 0
@@ -93,4 +93,3 @@ if __name__ == "__main__":
         processed.append(ret_com)
     write_excel(processed)
     chrome.quit()
-

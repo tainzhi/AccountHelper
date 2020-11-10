@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ffa8d5b929d0e4e81ed5d8a4413169162f59542480043c2305496d36125eb2fd"
+            "sha256": "b4d3916585f4a352f546799f43c92060d03a2a9bf79de8e9623f17b3ba68f6fc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -23,13 +23,12 @@
             ],
             "version": "==0.17"
         },
-        "macholib": {
+        "future": {
             "hashes": [
-                "sha256:0c436bc847e7b1d9bda0560351bf76d7caf930fb585a828d13608839ef42c432",
-                "sha256:c500f02867515e6c60a27875b408920d18332ddf96b4035ef03beddd782d4281"
+                "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"
             ],
-            "markers": "sys_platform == 'darwin'",
-            "version": "==1.14"
+            "markers": "python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+            "version": "==0.18.2"
         },
         "numpy": {
             "hashes": [
@@ -101,6 +100,20 @@
             "index": "aliyun",
             "version": "==1.1.4"
         },
+        "pathlib": {
+            "hashes": [
+                "md5:5099ed48be9b1ee29b31c82819240537"
+            ],
+            "index": "aliyun",
+            "version": "==1.0.1"
+        },
+        "pefile": {
+            "hashes": [
+                "sha256:a5d6e8305c6b210849b47a6174ddf9c452b2888340b8177874b862ba6c207645"
+            ],
+            "markers": "sys_platform == 'win32'",
+            "version": "==2019.4.18"
+        },
         "pillow": {
             "hashes": [
                 "sha256:006de60d7580d81f4a1a7e9f0173dc90a932e3905cc4d47ea909bc946302311a",
@@ -149,6 +162,14 @@
             ],
             "version": "==2020.10"
         },
+        "pysimplegui": {
+            "hashes": [
+                "sha256:181b9e65e9ddb4e85c1f0ffaff0d0c7ade0d1571158a4a979ebd4e006d870533",
+                "sha256:9d8e6b8c4996c2478191b66559f00ef25f366e17ed709b5f6aa6a35a8f490e4f"
+            ],
+            "index": "aliyun",
+            "version": "==4.30.0"
+        },
         "python-dateutil": {
             "hashes": [
                 "sha256:73ebfe9dbf22e832286dafa60473e4cd239f8592f699aa5adaf10050e6e1823c",
@@ -162,6 +183,14 @@
                 "sha256:5c55e189b682d420be27c6995ba6edce0c0a77dd67bfbe2ae6607134d5851ffd"
             ],
             "version": "==2020.4"
+        },
+        "pywin32-ctypes": {
+            "hashes": [
+                "sha256:24ffc3b341d457d48e8922352130cf2644024a4ff09762a2261fd34c36ee5942",
+                "sha256:9dc2d991b3479cc2df15930958b674a48a227d5361d413827a4cfd0b5876fc98"
+            ],
+            "markers": "sys_platform == 'win32'",
+            "version": "==0.2.0"
         },
         "selenium": {
             "hashes": [
