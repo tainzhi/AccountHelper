@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-
+from platform import system
 import chrome
 
 
@@ -46,7 +46,6 @@ def read_excel(excel):
 def get_save_png_dir():
     root_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = 'picture'
-    save_png_dir = root_dir.join('picture')
     if not os.path.exists(base_dir):
         os.makedirs(base_dir)
     return os.path.join(root_dir, base_dir)
@@ -58,37 +57,40 @@ def write_excel(companies):
     writer = pd.ExcelWriter('result.xlsx', engine='xlsxwriter')
     pd.DataFrame(companies).to_excel(writer, sheet_name='new', index=False)
     writer.save()
-    # df1 = pd.DataFrame({'Names': ['Andreas', 'George', 'Steve',
-    #                               'Sarah', 'Joanna', 'Hanna'],
-    #                     'Age': [21, 22, 20, 19, 18, 23]})
-    #
-    # df2 = pd.DataFrame({'Names': ['Pete', 'Jordan', 'Gustaf',
-    #                               'Sophie', 'Sally', 'Simone'],
-    #                     'Age': [22, 21, 19, 19, 29, 21]})
-    #
-    # df3 = pd.DataFrame({'Names': ['Ulrich', 'Donald', 'Jon',
-    #                               'Jessica', 'Elisabeth', 'Diana'],
-    #                     'Age': [21, 21, 20, 19, 19, 22]})
-    #
-    # dfs = {'Group1': df1, 'Group2': df2, 'Group3': df3}
-    # writer = pd.ExcelWriter('NamesAndAges.xlsx', engine='xlsxwriter')
-    #
-    # for sheet_name in dfs.keys():
-    #     dfs[sheet_name].to_excel(writer, sheet_name=sheet_name, index=False)
+
+
+def get_driver_location():
+    """
+    不要挪到Chrome.class中， 因为通过pyinstaller打包成单个exe文件后，会使用temp路径
+    最终导致取不到drvier路径
+    :return:
+    """
+    os_type = system()
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    drivers_dir = os.path.join(root_dir, 'drivers')
+    if os_type == 'Darwin':
+        return os.path.join(drivers_dir, 'chromedriver_mac64')
+    elif os_type == 'Windows':
+        return os.path.join(drivers_dir, 'chromedriver_win32.exe')
+    elif os_type == 'Linux':
+        return os.path.join(drivers_dir, 'chromedriver_linux64')
+    else:
+        print('不支持的系统类型！')
+        exit(-1)
 
 
 if __name__ == "__main__":
     excel = select_excel()
     companies = read_excel(excel)
-    chrome = chrome.Chrome('https://www.tianyancha.com/')
-    processed = pd.np.array()
+    chrome = chrome.Chrome(get_driver_location(), 'https://www.tianyancha.com/')
+    processed = []
+    all_count = len(companies)
     index = 0
     for com in companies:
+        index += 1
         ret_com = chrome.save_pic(get_save_png_dir(), com)
-        pd.np.append(processed, ret_com)
-        index = index + 1
-        if index == 3:
-            break
+        print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
+        processed.append(ret_com)
     write_excel(processed)
     chrome.quit()
 

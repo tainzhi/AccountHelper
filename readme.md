@@ -11,6 +11,7 @@
 - in terminal window, type `pyinstaller -F main.py`, then the generated executable file is saved in `dist/`
 - [pyinstaller不是交叉编译软件, 可以跨平台, 但是要在不同平台分别打包; 对运行性能没有直接影响](https://gitchat.csdn.net/activity/5c8f101aa7494e3e31a04743)
 - 为了减小打包体积, 只import需要的module
+- 打包的程序闪退，解决办法**从terminal执行exe程序， 输出错误信息到terminal
 - parameter
 >- `-F`, generated single zip executable file; without `-F`, 生成一堆文件， 但运行速度快
 >- `-W`, 禁止弹出控制台窗口
@@ -27,6 +28,7 @@ http://mirrors.aliyun.com/pypi/simple/
 
 ## 包错误
 - [安装最新版本的上一个版本](https://blog.csdn.net/HsinglukLiu/article/details/109555299)
+
 
 ## Todo
 - [添加执行icon和管理员权限盾牌](https://blog.csdn.net/laiyaoditude/article/details/85278037)

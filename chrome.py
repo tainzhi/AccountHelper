@@ -2,9 +2,8 @@
 
 import os
 import time
-from platform import system
-
-import pandas
+import numpy
+from difflib import SequenceMatcher
 from selenium import webdriver, common
 from PIL import Image
 
@@ -13,12 +12,7 @@ class Chrome:
     __driver = None
 
     # 初始化, 并加载 天眼查根目录
-    def __init__(self, url):
-        self.root = url
-        driver_location = self.get_driver()
-        if driver_location is None:
-            print('不支持的系统类型！')
-            exit(-1)
+    def __init__(self, driver_location, url):
         self.__driver = webdriver.Chrome(driver_location)
         self.__driver.get(url)
         self.__driver.implicitly_wait(5)
@@ -51,30 +45,13 @@ class Chrome:
             cropped_image.save(saved_image_path)
         except OSError:
             print(OSError.strerror)
-        same = True
-        if company_address != detail_address:
-            same = False
-        ret_company = company
-        ret_company = pandas.np.append(ret_company, same)
+        same_ratio = '{:.3f}'.format(SequenceMatcher(None, company_address, detail_address).ratio())
+        ret_company = numpy.append(company, [detail_address, same_ratio])
         return ret_company
-        
+
     def quit(self):
         # quit Chrome browser
         self.__driver.quit()
-
-    @staticmethod
-    def get_driver():
-        os_type = system()
-        root_dir = os.path.dirname(os.path.abspath(__file__))
-        drivers_dir = os.path.join(root_dir, 'drivers')
-        if os_type == 'Darwin':
-            return os.path.join(drivers_dir, 'chromedriver_mac64')
-        elif os_type == 'Windows':
-            return os.path.join(drivers_dir, 'chromedriver_win32.exe')
-        elif os_type == 'Linux':
-            return os.path.join(drivers_dir, 'chromedriver_linux64')
-        else:
-            return None
 
     def lazy_click(self, driver,
                    element):  # 简单的封装了一下click方法，页面未加载完成的时候会出现NoSuchElementException或者ElementNotInteractableException错误，捕获错误并重试，默认重试50次，相当于最大等待时长50s
