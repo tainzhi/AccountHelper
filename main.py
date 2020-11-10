@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from platform import system
 from chrome import Chrome
+import PySimpleGUI as sg
 
 
 def select_excel():
@@ -87,8 +88,7 @@ def get_driver_location():
         exit(-1)
 
 
-if __name__ == "__main__":
-    excel = select_excel()
+def process(excel):
     companies = read_excel(excel)
     chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/')
     processed = []
@@ -101,3 +101,23 @@ if __name__ == "__main__":
         processed.append(ret_com)
     write_excel(processed)
     chrome.quit()
+
+
+if __name__ == "__main__":
+    sg.theme("DarkTeal2")
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    layout = [[sg.T("")],
+              [sg.T("")],
+              [sg.Text("Choose a excel: "), sg.Input(key="-IN2-", change_submits=True), sg.FileBrowse(ey="-IN-", initial_folder=current_dir,file_types=("ALL Files", "*.xlsx"))],
+              [sg.Button("Submit")]]
+
+    window = sg.Window('财务助手', layout, size=(1000, 800))
+
+    while True:
+        event, values = window.read()
+        print(values["-IN2-"])
+        if event == sg.WIN_CLOSED or event == "Exit":
+            break
+        elif event == "Submit":
+            excel = values["-IN-"]
+            process(excel)
