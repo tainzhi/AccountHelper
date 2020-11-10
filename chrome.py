@@ -18,6 +18,12 @@ class Chrome:
         self.__driver.implicitly_wait(5)
 
     def save_pic(self, pic_root_dir, company):
+        """
+        截图后， crop成指定大小
+        :param pic_root_dir:
+        :param company:
+        :return:
+        """
         company_code = company[1]
         company_name = company[2]
         company_address = company[3]

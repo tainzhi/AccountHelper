@@ -17,13 +17,15 @@
 >- `-W`, 禁止弹出控制台窗口
 >- `--uac-admin`, `-m`, manifest File
 >- `-i <icon File`, icon
+```bash
+pyinstaller -i account.ico -n "财务助手" main.py -F
+```
 
 ## pipenv
 - 改变source， 根目录下的`Pipfile`url为, 同时更改name, ide会自动弹出Notification提醒**pipenv update**
 - 优点: 跨平台支持良好(不同平台不产生多余配置文件), 不产生env目录, 自动管理更新下载依赖包 
 ```
 http://mirrors.aliyun.com/pypi/simple/
-
 ```
 
 ## 包错误
@@ -41,7 +43,6 @@ http://mirrors.aliyun.com/pypi/simple/
 ##　包选择
 - 截屏
 - 裁剪图片Pillow是PIL的分支版
-- 
 
 ## python 4中截屏方法
 - [python class](https://www.runoob.com/python3/python3-class.html): Selenium支持跨平台(win10/mac)
