@@ -17,6 +17,9 @@ class Chrome:
         self.__driver.get(url)
         self.__driver.implicitly_wait(5)
 
+    def login(self):
+
+
     def save_pic(self, pic_root_dir, company):
         """
         截图后， crop成指定大小

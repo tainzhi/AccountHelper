@@ -4,7 +4,25 @@
 
 ### 1 下载chrome驱动
 - [chrome driver install](https://blog.csdn.net/n123456uo/article/details/91412740)
-### 
+### python相关
+- MacOs下重装
+>- `brew unisntall python3`
+>- 去[Taobao mirror](https://npm.taobao.org/mirrors/python/3.8.6/)下载最新的安装包
+### 卸载
+第一步：删除框架
+```bash
+sudo rm -rf /Library/Frameworks/Python.framework/Versions/2.7
+```
+第二步：删除应用目录
+```bash
+sudo rm -rf "/Applications/Python 2.7"
+```
+第三步：删除指向python的链接
+```bash
+cd /usr/local/bin/
+ls -l /usr/local/bin | grep '/Library/Frameworks/Python.framework/Versions/2.7'                             # 查看链接
+brew prune                  # 清除链接和目
+```
 
 ## package to executable file
 - download `pyinstaller` module
