@@ -3,6 +3,7 @@ import pandas as pd
 from platform import system
 from chrome import Chrome
 import PySimpleGUI as sg
+import threading
 
 
 def select_excel():
@@ -88,9 +89,17 @@ def get_driver_location():
         exit(-1)
 
 
-def process(excel):
+def get_cookie_dir():
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = 'cookie'
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
+    return os.path.join(root_dir, base_dir)
+
+
+def process(excel, window):
     companies = read_excel(excel)
-    chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/')
+    chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/', get_cookie_dir(), window)
     processed = []
     all_count = len(companies)
     index = 0
@@ -104,20 +113,31 @@ def process(excel):
 
 
 if __name__ == "__main__":
-    sg.theme("DarkTeal2")
+    sg.theme('Light Brown 3')
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    layout = [[sg.T("")],
-              [sg.T("")],
-              [sg.Text("Choose a excel: "), sg.Input(key="-IN2-", change_submits=True), sg.FileBrowse(key="-IN-", initial_folder=current_dir,file_types=("ALL Files", "*.xlsx"))],
-              [sg.Button("Submit")]]
+    icon = os.path.join(current_dir, 'account.icon')
+    layout = [
+        [sg.Text("选择一个excel文件", size=(14, 1), font=('Helvetica 20')), sg.Input(key="-IN2-", change_submits=True),
+         sg.FileBrowse(key="-IN-", initial_folder=current_dir, file_types=("ALL Files", "*.xlsx"))],
+        [sg.Button("开始", key='Go')],
+        [sg.Text(size=(35, 1), key='-STATE-')],
+    ]
 
-    window = sg.Window('财务助手', layout, size=(1000, 800))
+    window = sg.Window('财务助手', layout, size=(1000, 800), icon=icon)
 
     while True:
         event, values = window.read()
         print(values["-IN2-"])
         if event == sg.WIN_CLOSED or event == "Exit":
             break
-        elif event == "Submit":
+        elif event == '-Chrome State-':
+            window['-STATE-'].update(values[event])
+        elif event == "Go":
             excel = values["-IN-"]
-            process(excel)
+            # 开启daemon线程
+            thread = threading.Thread(
+                target=process,
+                args=(excel, window,),
+                daemon=True
+            )
+            thread.start()

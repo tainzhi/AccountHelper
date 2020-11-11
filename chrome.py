@@ -6,23 +6,54 @@ import numpy
 from difflib import SequenceMatcher
 from selenium import webdriver, common
 from PIL import Image
+import pickle
 
 
 class Chrome:
     __driver = None
+    __cookie_dir = None
+    __window = None
+    __url = None
+    __cookie_name = 'chrome.cookie'
 
     # 初始化, 并加载 天眼查根目录
-    def __init__(self, driver_location, url, cookie_location=None):
+    def __init__(self, driver_location, url, cookie_location=None, window=None):
         self.__driver = webdriver.Chrome(driver_location)
-        self.__driver.get(url)
-        self.__driver.implicitly_wait(5)
+        self.__url = url
+        self.__cookie_dir = cookie_location
+        self.__window = window
         self.login()
 
     def login(self):
+        cookie_path = os.path.join(self.__cookie_dir, self.__cookie_name)
+        if os.path.exists(cookie_path):
+            try:
+                self.__driver.get(self.__url)
+                open_file = open(cookie_path, 'rb')
+                cookies = pickle.load(open_file)
+                open_file.close()
+                for co in cookies:
+                    self.__driver.add_cookie(co)
+                self.__driver.get(self.__url)
+                self.__driver.implicitly_wait(5)
+                if self.is_login():
+                    return
+                else:
+                    self.login_get_cookie(cookie_path)
+            except EOFError:
+                self.login_get_cookie(cookie_path)
+        else:
+            self.login_get_cookie(cookie_path)
+
+    def login_get_cookie(self, cookie_path):
+        # 没有登录成功
         # 我在开发的时候， 刚好在双十一， 一进入该页面， 会弹出一个促销dialog， 故需要close
+        self.__driver.get(self.__url)
+        self.__driver.implicitly_wait(5)
         try:
             self.__driver.find_element_by_css_selector('.modal-close').click()
-        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException, common.exceptions.ElementNotInteractableException):
+        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException,
+                common.exceptions.ElementNotInteractableException):
             print("no ad dialog")
         # 点击登录
         self.__driver.find_element_by_css_selector("[onclick='header.loginLink(event)']").click()
@@ -37,9 +68,32 @@ class Chrome:
                     ):
                 break
             time.sleep(1)
-            print("请扫码登录")
+            # print("请扫码登录")
+            self.__window.write_event_value('-Chrome State-', "请扫码登录")
+        # 获取了很多个cookie, 类似这样[{'domain':...}, {}, {}]
+        # 其实只有一个cookie dict是有效的
+        # cookie = {
+        #     'domain': 'tianyania.com',
+        #     'httpOnly': False,
+        #     'path': '/',
+        #     'secure': False
+        # }
         cookie = self.__driver.get_cookies()
+        open_file = open(cookie_path, 'wb')
+        pickle.dump(cookie, open_file)
+        open_file.close()
         print(cookie)
+
+    def is_login(self):
+        try:
+            user_name = self.__driver.find_element_by_css_selector('.nav-user-name').text
+            return True
+        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException,
+                common.exceptions.ElementNotInteractableException):
+            return False
+
+    def read_cookie(self, cookie_path):
+        return
 
     def save_pic(self, pic_root_dir, company):
         """
