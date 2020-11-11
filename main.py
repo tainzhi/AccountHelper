@@ -108,7 +108,7 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))
     layout = [[sg.T("")],
               [sg.T("")],
-              [sg.Text("Choose a excel: "), sg.Input(key="-IN2-", change_submits=True), sg.FileBrowse(ey="-IN-", initial_folder=current_dir,file_types=("ALL Files", "*.xlsx"))],
+              [sg.Text("Choose a excel: "), sg.Input(key="-IN2-", change_submits=True), sg.FileBrowse(key="-IN-", initial_folder=current_dir,file_types=("ALL Files", "*.xlsx"))],
               [sg.Button("Submit")]]
 
     window = sg.Window('财务助手', layout, size=(1000, 800))
