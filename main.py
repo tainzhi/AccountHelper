@@ -111,7 +111,7 @@ def process_by_thread(companies, window):
         # print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
     chrome.quit()
 
-def process(excel, window):
+def thread_processing(excel, window):
     companies = read_excel(excel)
     # 登录，并保存cookie
     chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/', get_cookie_dir(), window)
@@ -132,6 +132,20 @@ def process(excel, window):
         threads.append(t)
         t.start()
 
+def process(excel, window):
+    companies = read_excel(excel)
+    chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/', get_cookie_dir(), window)
+    processed = []
+    all_count = len(companies)
+    index = 0
+    for com in companies:
+        index += 1
+        ret_com = chrome.save_pic(get_save_png_dir(), com)
+        print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
+        processed.append(ret_com)
+    write_excel(processed)
+    chrome.quit()
+
 def split_list_average_n(origin_list, n):
     """
     list均分成 n 份
@@ -147,7 +161,7 @@ if __name__ == "__main__":
     icon = os.path.join(current_dir, 'account.icon')
     layout = [
         [sg.Text("选择一个excel文件", size=(14, 1), font=('Helvetica 20')), sg.Input(key="-IN2-", change_submits=True),
-         sg.FileBrowse(key="-IN-", initial_folder=current_dir, file_types=("ALL Files", "*.xlsx"))],
+         sg.FileBrowse(key="-IN-", initial_folder=current_dir, file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx")))],
         [sg.Button("开始", key='Go')],
         [sg.Text(size=(35, 1), key='-STATE-')],
     ]
