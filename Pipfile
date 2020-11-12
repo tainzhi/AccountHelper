@@ -13,7 +13,6 @@ xlsxwriter = "*"
 pillow = "*"
 pathlib = "*"
 pysimplegui = "*"
-psutil = "*"
 
 [dev-packages]
 

@@ -4,6 +4,7 @@ from platform import system
 from chrome import Chrome
 import PySimpleGUI as sg
 import threading
+import util
 
 # 多文件全局变量
 COOKIE_DIR = './cookie'
@@ -120,7 +121,7 @@ def thread_processing(excel, window):
     # processed.append(ret_com)
     # write_excel(processed)
     thread_count = 4
-    splited_commpanes = split_list_average_n(companies, thread_count)
+    splited_commpanes = util.Util.split_list_average_n(companies, thread_count)
     threads = []
     # 开启daemon线程
     for com in splited_commpanes:
@@ -145,15 +146,6 @@ def process(excel, window):
         processed.append(ret_com)
     write_excel(processed)
     chrome.quit()
-
-def split_list_average_n(origin_list, n):
-    """
-    list均分成 n 份
-    """
-    # +1是取float 上限 ceil， 不+1会产生 n+1个数组
-    each_count = int(len(origin_list) / n) + 1
-    for i in range(0, len(origin_list), each_count):
-        yield origin_list[i: i + each_count]
 
 if __name__ == "__main__":
     sg.theme('Light Brown 3')

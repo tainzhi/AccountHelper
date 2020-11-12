@@ -3,10 +3,11 @@
 import os
 import time
 import numpy
-from difflib import SequenceMatcher
 from selenium import webdriver, common
 from PIL import Image
 import pickle
+
+import util
 
 
 class Chrome:
@@ -123,14 +124,14 @@ class Chrome:
         # 最终保存的图片路径
         saved_image_path = os.path.join(pic_root_dir, saved_image_path)
         self.__driver.save_screenshot(saved_image_path)
-        # try:
-        #     im = Image.open(saved_image_path)
-        #     cropped_image = im.crop(rect)
-        #     cropped_image.save(saved_image_path)
-        # except OSError:
-        #     print(OSError.strerror)
-        same_ratio = '{:.3f}'.format(SequenceMatcher(None, company_address, detail_address).ratio())
-        ret_company = numpy.append(company, [detail_address, same_ratio])
+        if util.IS_CROP_IMAGE:
+            try:
+                im = Image.open(saved_image_path)
+                cropped_image = im.crop(rect)
+                cropped_image.save(saved_image_path)
+            except OSError:
+                print(OSError.strerror)
+        ret_company = numpy.append(company, [detail_address, util.Util.is_same_address(company_address, detail_address)])
         return ret_company
 
     def quit(self):
