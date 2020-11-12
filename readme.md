@@ -23,6 +23,17 @@ cd /usr/local/bin/
 ls -l /usr/local/bin | grep '/Library/Frameworks/Python.framework/Versions/2.7'                             # 查看链接
 brew prune                  # 清除链接和目
 ```
+## 其他要学习的python repo
+https://github.com/tainzhi/CookiePool/blob/master/cookiepool/db.py
+
+## PySimGUI
+https://pysimplegui.readthedocs.io/en/latest/cookbook/
+https://github.com/PySimpleGUI/PySimpleGUI/blob/master/DemoPrograms/Demo_Img_Viewer.py
+
+## 打包工具nuitka
+http://element-ui.cn/python/show-23924.aspx
+https://zhuanlan.zhihu.com/p/133303836
+https://zhuanlan.zhihu.com/p/141810934
 
 ## package to executable file
 - download `pyinstaller` module
