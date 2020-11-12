@@ -1,178 +1,115 @@
 import os
 import pandas as pd
-from platform import system
 from chrome import Chrome
 import PySimpleGUI as sg
 import threading
 import util
 
-# 多文件全局变量
-COOKIE_DIR = './cookie'
-PICTURE_DIR = './picture'
 
-
-def select_excel():
-    """
-    从当前目录 excels/ 下选取一个 xls
-    :return:
-    """
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    excels_dir = os.path.join(root_dir, 'excels')
-    excels = []
-    for file in os.listdir(excels_dir):
-        file_path = os.path.join(excels_dir, file)
-        if os.path.isfile(file_path):
-            excels.append(file_path)
-    if len(excels) > 0:
-        print("选择要处理的excel：\n")
-        for i in range(0, len(excels)):
-            print("{index}: {file}\n".format(index=i, file=os.path.basename(excels[i])))
-    while True:
-        choose_index = input("请输入数字选择:\n")
-        choose_index = int(choose_index)
-        if choose_index < 0 or choose_index >= len(excels):
-            print("请输入正确的数字选择:\n")
-        else:
-            break
-    return excels[choose_index]
-
-
-def read_excel(excel):
-    """
-    读取excel
-    :param excel:
-    :return:
-    """
-    read = pd.read_excel(excel)
-    # 从第2行开始， 获取每行的每列
-    data = read.iloc[2:, 0:]
-    # print("获取到所有的值:\n{0}".format(data))  # 格式化输出
-    return data.values
-
-
-def get_save_png_dir():
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    base_dir = 'picture'
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir)
-    return os.path.join(root_dir, base_dir)
-
-
-def get_cookie():
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    base_dir = 'cookie'
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir)
-    return os.path.join(root_dir, base_dir)
+def read_excel(excel_file):
+	"""
+	读取excel, 调过第0,1 行, 提取列为 代码, 往来单位名称, 收件地址
+	:param excel:
+	:return:
+	"""
+	read = pd.read_excel(excel_file, skiprows=[0,1], usecols=['代码','往来单位名称','收件地址'])
+	# 获取所有的行,所有的列
+	data = read.iloc[0:, 0:]
+	# print("获取到所有的值:\n{0}".format(data))  # 格式化输出
+	return data.values
 
 
 def write_excel(companies):
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    excels_dir = os.path.join(root_dir, 'excels')
-    writer = pd.ExcelWriter('result.xlsx', engine='xlsxwriter')
-    pd.DataFrame(companies).to_excel(writer, sheet_name='new', index=False)
-    writer.save()
-
-
-def get_driver_location():
-    """
-    不要挪到Chrome.class中， 因为通过pyinstaller打包成单个exe文件后，会使用temp路径
-    最终导致取不到drvier路径
-    :return:
-    """
-    os_type = system()
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    drivers_dir = os.path.join(root_dir, 'drivers')
-    if os_type == 'Darwin':
-        return os.path.join(drivers_dir, 'chromedriver_mac64')
-    elif os_type == 'Windows':
-        return os.path.join(drivers_dir, 'chromedriver_win32.exe')
-    elif os_type == 'Linux':
-        return os.path.join(drivers_dir, 'chromedriver_linux64')
-    else:
-        print('不支持的系统类型！')
-        exit(-1)
-
-
-def get_cookie_dir():
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    base_dir = 'cookie'
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir)
-    return os.path.join(root_dir, base_dir)
+	root_dir = os.path.dirname(os.path.abspath(__file__))
+	excels_dir = os.path.join(root_dir, 'excels')
+	writer = pd.ExcelWriter('result.xlsx', engine='xlsxwriter')
+	pd.DataFrame(companies).to_excel(writer, sheet_name='new', index=False)
+	writer.save()
 
 
 def process_by_thread(companies, window):
-    chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/', get_cookie_dir(), window)
-    all_count = len(companies)
-    index = 0
-    for com in companies:
-        index += 1
-        ret_com = chrome.save_pic(get_save_png_dir(), com)
-        # print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
-    chrome.quit()
+	chrome = Chrome('https://www.tianyancha.com/', window)
+	all_count = len(companies)
+	index = 0
+	for com in companies:
+		index += 1
+		ret_com = chrome.save_pic(util.Util.get_save_picture_dir(), com)
+	# print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
+	chrome.quit()
+
 
 def thread_processing(excel, window):
-    companies = read_excel(excel)
-    # 登录，并保存cookie
-    chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/', get_cookie_dir(), window)
-    chrome.quit()
-    # processed = []
-    # processed.append(ret_com)
-    # write_excel(processed)
-    thread_count = 4
-    splited_commpanes = util.Util.split_list_average_n(companies, thread_count)
-    threads = []
-    # 开启daemon线程
-    for com in splited_commpanes:
-        t = threading.Thread(
-            target=process_by_thread,
-            args=(com, window,),
-            daemon=True
-        )
-        threads.append(t)
-        t.start()
+	companies = read_excel(excel)
+	# 登录，并保存cookie
+	chrome = Chrome('https://www.tianyancha.com/', window)
+	chrome.quit()
+	# processed = []
+	# processed.append(ret_com)
+	# write_excel(processed)
+	thread_count = 4
+	splited_commpanes = util.Util.split_list_average_n(companies, thread_count)
+	threads = []
+	# 开启daemon线程
+	for com in splited_commpanes:
+		t = threading.Thread(
+			target=process_by_thread,
+			args=(com, window,),
+			daemon=True
+		)
+		threads.append(t)
+		t.start()
 
-def process(excel, window):
-    companies = read_excel(excel)
-    chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/', get_cookie_dir(), window)
-    processed = []
-    all_count = len(companies)
-    index = 0
-    for com in companies:
-        index += 1
-        ret_com = chrome.save_pic(get_save_png_dir(), com)
-        print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
-        processed.append(ret_com)
-    write_excel(processed)
-    chrome.quit()
+
+def process(excel_file, window):
+	companies = read_excel(excel_file)
+	chrome = Chrome('https://www.tianyancha.com/', window)
+	processed = []
+	all_count = len(companies)
+	index = 0
+	for com in companies:
+		index += 1
+		ret_com = chrome.save_pic(util.Util.get_save_picture_dir(), com)
+		print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
+		processed.append(ret_com)
+	write_excel(processed)
+	chrome.quit()
+
+
+def run_ui():
+	sg.theme('Light Brown 3')
+	current_dir = os.path.dirname(os.path.abspath(__file__))
+	icon = os.path.join(current_dir, 'account.icon')
+	layout = [
+		[sg.Text("选择一个excel文件", size=(14, 1), font=('Helvetica 30')),
+		 sg.Input(key="-IN2-", size=(20, 10), font=('Helvetica 30'), change_submits=True),
+		 sg.FileBrowse(key="-IN-", initial_folder=current_dir,
+		               file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx")))],
+		[sg.Button("开始", key='Go')],
+		[sg.Text(size=(35, 1), key='-STATE-')],
+	]
+	window = sg.Window('财务助手', layout, size=(1000, 800), icon=icon)
+	while True:
+		event, values = window.read()
+		print(values["-IN2-"])
+		if event == sg.WIN_CLOSED or event == "Exit":
+			break
+		elif event == '-Chrome State-':
+			window['-STATE-'].update(values[event])
+		elif event == "Go":
+			excel_file = values["-IN-"]
+			# 开启daemon线程
+			thread = threading.Thread(
+				target=process,
+				args=(excel_file, window,),
+				daemon=True
+			)
+			thread.start()
+			
+def test_no_ui():
+	excel_file = './excels/被函证单位信息表（小康动力）.xlsx'
+	content = read_excel(excel_file)
+	print(content)
+	
 
 if __name__ == "__main__":
-    sg.theme('Light Brown 3')
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    icon = os.path.join(current_dir, 'account.icon')
-    layout = [
-        [sg.Text("选择一个excel文件", size=(14, 1), font=('Helvetica 30')), sg.Input(key="-IN2-", size=(20, 10),font=('Helvetica 30'), change_submits=True),
-         sg.FileBrowse(key="-IN-", initial_folder=current_dir, file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx")))],
-        [sg.Button("开始", key='Go')],
-        [sg.Text(size=(35, 1), key='-STATE-')],
-    ]
-
-    window = sg.Window('财务助手', layout, size=(1000, 800), icon=icon)
-
-    while True:
-        event, values = window.read()
-        print(values["-IN2-"])
-        if event == sg.WIN_CLOSED or event == "Exit":
-            break
-        elif event == '-Chrome State-':
-            window['-STATE-'].update(values[event])
-        elif event == "Go":
-            excel = values["-IN-"]
-            # 开启daemon线程
-            thread = threading.Thread(
-                target=process,
-                args=(excel, window,),
-                daemon=True
-            )
-            thread.start()
+	run_ui()

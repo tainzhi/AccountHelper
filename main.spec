@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['/Users/muqing/PycharmProjects/AccountHelper'],
+             pathex=['/Users/00390839/PycharmProjects/AccountHelper'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -30,8 +30,4 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False , icon='account.ico')
-app = BUNDLE(exe,
-             name='main.app',
-             icon='account.ico',
-             bundle_identifier=None)
+          console=True )

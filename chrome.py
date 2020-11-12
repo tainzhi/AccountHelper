@@ -6,22 +6,21 @@ import numpy
 from selenium import webdriver, common
 from PIL import Image
 import pickle
-
 import util
 
 
 class Chrome:
     __driver = None
-    __cookie_dir = None
     __window = None
     __url = None
+    __cookie_dir = util.PathUtil.get_cookie_dir()
     __cookie_name = 'chrome.cookie'
+    __driver_location = util.PathUtil.get_driver_location()
 
     # 初始化, 并加载 天眼查根目录
-    def __init__(self, driver_location, url, cookie_location=None, window=None):
-        self.__driver = webdriver.Chrome(driver_location)
+    def __init__(self, url, window=None):
+        self.__driver = webdriver.Chrome(self.__driver_location)
         self.__url = url
-        self.__cookie_dir = cookie_location
         self.__window = window
         self.login()
 

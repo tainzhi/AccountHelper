@@ -30,6 +30,7 @@ brew prune                  # 清除链接和目
 - [pyinstaller不是交叉编译软件, 可以跨平台, 但是要在不同平台分别打包; 对运行性能没有直接影响](https://gitchat.csdn.net/activity/5c8f101aa7494e3e31a04743)
 - 为了减小打包体积, 只import需要的module
 - 打包的程序闪退，解决办法**从terminal执行exe程序， 输出错误信息到terminal
+- [pyinstaller打包后资源路径怎么选择](https://blog.csdn.net/qq_31801903/article/details/81666124)
 - parameter
 >- `-F`, generated single zip executable file; without `-F`, 生成一堆文件， 但运行速度快
 >- `-w`, 禁止弹出控制台窗口, 生成gui程序
