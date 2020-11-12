@@ -160,7 +160,7 @@ if __name__ == "__main__":
     current_dir = os.path.dirname(os.path.abspath(__file__))
     icon = os.path.join(current_dir, 'account.icon')
     layout = [
-        [sg.Text("选择一个excel文件", size=(14, 1), font=('Helvetica 20')), sg.Input(key="-IN2-", change_submits=True),
+        [sg.Text("选择一个excel文件", size=(14, 1), font=('Helvetica 30')), sg.Input(key="-IN2-", size=(20, 10),font=('Helvetica 30'), change_submits=True),
          sg.FileBrowse(key="-IN-", initial_folder=current_dir, file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx")))],
         [sg.Button("开始", key='Go')],
         [sg.Text(size=(35, 1), key='-STATE-')],
