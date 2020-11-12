@@ -102,13 +102,13 @@ class Chrome:
         :param company:
         :return:
         """
-        company_code = company[1]
-        company_name = company[2]
-        company_address = company[3]
+        company_code = company[0]
+        company_name = company[1]
+        company_address = company[2]
 
         self.__driver.get("https://www.tianyancha.com/search?key={value}".format(value=company_name))
         # 获取第一条记录的公司的超链接
-        company_url = self.__driver.find_element_by_css_selector('.name,.select-none').get_attribute('href')
+        company_url = self.__driver.find_element_by_css_selector(".name,[tyc-event-ch='CompanySearch.Company']").get_attribute('href')
         self.__driver.get(company_url)
         detail_address = self.__driver.find_element_by_css_selector('.detail-content').text
         detail_element = self.__driver.find_element_by_css_selector('.box > .content')

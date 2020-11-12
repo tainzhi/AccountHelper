@@ -96,6 +96,18 @@ mydict
 
 ## selenium多线程
 - 对同一个网站多线程爬取，会很容易被网站检测出爬虫行为，而被禁止
+- css selecotr多个class选取
+```html
+<div class="search header" name="hello" search="ok">
+   <div class="header" name="world>
+   </div>
+</div>
+```
+- 那么css class selector为`.search.header`, **中间没有空格**,匹配外层element
+- css selector用法为`".search,[search='ok']"`,匹配外层element
+- css属性selector为`[name=hello]`
+- css class selector为`.search .header`(**中间有空格**), 匹配到的是内层element
+
 
 ## 省市区地址格式化
 - 模块 cpca 可以获取标准化的省市区地址

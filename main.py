@@ -68,7 +68,7 @@ def process(excel_file, window):
 	index = 0
 	for com in companies:
 		index += 1
-		ret_com = chrome.save_pic(util.Util.get_save_picture_dir(), com)
+		ret_com = chrome.save_pic(util.PathUtil.get_save_picture_dir(), com)
 		print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
 		processed.append(ret_com)
 	write_excel(processed)
