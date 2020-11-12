@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['C:\\Users\\muqing\\PycharmProjects\\AccountingHelper'],
+             pathex=['/Users/muqing/PycharmProjects/AccountHelper'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -30,4 +30,8 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=True , icon='account.ico')
+          console=False , icon='account.ico')
+app = BUNDLE(exe,
+             name='财务助手.app',
+             icon='account.ico',
+             bundle_identifier=None)

@@ -5,6 +5,10 @@ from chrome import Chrome
 import PySimpleGUI as sg
 import threading
 
+# 多文件全局变量
+COOKIE_DIR = './cookie'
+PICTURE_DIR = './picture'
+
 
 def select_excel():
     """
@@ -97,20 +101,45 @@ def get_cookie_dir():
     return os.path.join(root_dir, base_dir)
 
 
-def process(excel, window):
-    companies = read_excel(excel)
+def process_by_thread(companies, window):
     chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/', get_cookie_dir(), window)
-    processed = []
     all_count = len(companies)
     index = 0
     for com in companies:
         index += 1
         ret_com = chrome.save_pic(get_save_png_dir(), com)
-        print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
-        processed.append(ret_com)
-    write_excel(processed)
+        # print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
     chrome.quit()
 
+def process(excel, window):
+    companies = read_excel(excel)
+    # 登录，并保存cookie
+    chrome = Chrome(get_driver_location(), 'https://www.tianyancha.com/', get_cookie_dir(), window)
+    chrome.quit()
+    # processed = []
+    # processed.append(ret_com)
+    # write_excel(processed)
+    thread_count = 4
+    splited_commpanes = split_list_average_n(companies, thread_count)
+    threads = []
+    # 开启daemon线程
+    for com in splited_commpanes:
+        t = threading.Thread(
+            target=process_by_thread,
+            args=(com, window,),
+            daemon=True
+        )
+        threads.append(t)
+        t.start()
+
+def split_list_average_n(origin_list, n):
+    """
+    list均分成 n 份
+    """
+    # +1是取float 上限 ceil， 不+1会产生 n+1个数组
+    each_count = int(len(origin_list) / n) + 1
+    for i in range(0, len(origin_list), each_count):
+        yield origin_list[i: i + each_count]
 
 if __name__ == "__main__":
     sg.theme('Light Brown 3')

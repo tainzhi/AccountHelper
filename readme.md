@@ -32,11 +32,11 @@ brew prune                  # 清除链接和目
 - 打包的程序闪退，解决办法**从terminal执行exe程序， 输出错误信息到terminal
 - parameter
 >- `-F`, generated single zip executable file; without `-F`, 生成一堆文件， 但运行速度快
->- `-W`, 禁止弹出控制台窗口
+>- `-w`, 禁止弹出控制台窗口, 生成gui程序
 >- `--uac-admin`, `-m`, manifest File
 >- `-i <icon File`, icon
 ```bash
-pyinstaller -i account.ico -n "财务助手" main.py -F
+pyinstaller -F -w -i account.ico -n "财务助手" main.py
 ```
 
 ## pipenv
@@ -82,3 +82,16 @@ http://mirrors.aliyun.com/pypi/simple/
 'world hello world'
 print("网站名：{name}, 地址 {url}".format(name="菜鸟教程", url="www.runoob.com"))
 ```
+
+## pickle保存dict/list
+```python
+mydict = {"1": 10, "3": 30}
+with open("./data/medFile/test.pickle", "wb") as fp:   #Pickling
+    pickle.dump(mydict, fp, protocol = pickle.HIGHEST_PROTOCOL)      
+with open("./data/medFile/test.pickle", "rb") as fp:   #Pickling
+    mydict = pickle.load(fp)     
+mydict
+```
+
+## selenium多线程
+- 对同一个网站多线程爬取，会很容易被网站检测出爬虫行为，而被禁止
