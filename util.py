@@ -47,6 +47,14 @@ class Util:
 		for i in range(0, len(origin_list), each_count):
 			yield origin_list[i: i + each_count]
 
+	@staticmethod
+	def set_up_log_config():
+		"""
+		从 ./log/log.yaml加载 logging 配置
+		:return:
+		"""
+		log_config_location = os.path.join(PathUtil.get_executable_path(), 'log', 'log.yaml')
+
 
 class PathUtil:
 	@staticmethod
@@ -81,7 +89,19 @@ class PathUtil:
 		if not os.path.exists(base_dir):
 			os.makedirs(base_dir)
 		return os.path.join(root_dir, base_dir)
-	
+
+	@staticmethod
+	def get_log_config():
+		"""
+		log_config
+		:return:
+		"""
+		root_dir = PathUtil.get_executable_path()
+		base_dir = 'log'
+		if not os.path.exists(base_dir):
+			os.makedirs(base_dir)
+		return os.path.join(root_dir, base_dir)
+
 	@staticmethod
 	def get_driver_location():
 		"""

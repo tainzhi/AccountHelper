@@ -2,13 +2,13 @@
 
 ## 使用方法
 
-### 1 下载chrome驱动
+### chrome驱动
 - [chrome driver install](https://blog.csdn.net/n123456uo/article/details/91412740)
 ### python相关
 - MacOs下重装
 >- `brew unisntall python3`
 >- 去[Taobao mirror](https://npm.taobao.org/mirrors/python/3.8.6/)下载最新的安装包
-### 卸载
+### python卸载
 第一步：删除框架
 ```bash
 sudo rm -rf /Library/Frameworks/Python.framework/Versions/2.7
@@ -26,16 +26,22 @@ brew prune                  # 清除链接和目
 ## 其他要学习的python repo
 https://github.com/tainzhi/CookiePool/blob/master/cookiepool/db.py
 
-## PySimGUI
+## 图形化PySimGUI
 https://pysimplegui.readthedocs.io/en/latest/cookbook/
 https://github.com/PySimpleGUI/PySimpleGUI/blob/master/DemoPrograms/Demo_Img_Viewer.py
 
-## 打包工具nuitka
+## 打包工具 package to executable file
+- 必须要在打包后生成exe的当前目录下放置如下目录（copy过去)
+>- drivers: chrome driver
+>- logs: 包含log的config文件
+
+### 1 nuitka
 http://element-ui.cn/python/show-23924.aspx
 https://zhuanlan.zhihu.com/p/133303836
 https://zhuanlan.zhihu.com/p/141810934
 
-## package to executable file
+### 2 pyinstaller
+
 - download `pyinstaller` module
 - in terminal window, type `pyinstaller -F main.py`, then the generated executable file is saved in `dist/`
 - [pyinstaller不是交叉编译软件, 可以跨平台, 但是要在不同平台分别打包; 对运行性能没有直接影响](https://gitchat.csdn.net/activity/5c8f101aa7494e3e31a04743)
@@ -55,7 +61,7 @@ pyinstaller -F -w -i account.ico -n "财务助手" main.py
 - 改变source， 根目录下的`Pipfile`url为, 同时更改name, ide会自动弹出Notification提醒**pipenv update**
 - 优点: 跨平台支持良好(不同平台不产生多余配置文件), 不产生env目录, 自动管理更新下载依赖包 
 ```
-http://mirrors.aliyun.com/pypi/simple/
+https://mirrors.aliyun.com/pypi/simple/
 ```
 
 ## 包错误
@@ -63,25 +69,18 @@ http://mirrors.aliyun.com/pypi/simple/
 
 
 ## Todo
-- 扫描二维码, 保留cookie,[参考](https://github.com/tychxn/jd-assistant/blob/master/main.py)
 - [添加log， 记录执行记录和错误到文件](https://blog.csdn.net/zywvvd/article/details/87857816)
 - [添加执行icon和管理员权限盾牌](https://blog.csdn.net/laiyaoditude/article/details/85278037)
 - 企查查多线程操作, 登录使用cookie
 - python async
 - python多线程线程池
-- 添加gui支持
 
-##　包选择
-- 截屏
-- 裁剪图片Pillow是PIL的分支版
-
-## python 4中截屏方法
+## python学习
 - [python class](https://www.runoob.com/python3/python3-class.html): Selenium支持跨平台(win10/mac)
 - [python multi thread](https://www.runoob.com/python3/python3-multithreading.html)
 - [python 4种截屏方法](https://www.jb51.net/article/168609.htm)
 - [selenium反爬虫](https://blog.csdn.net/weixin_44685869/article/details/105602629?utm_medium=distribute.pc_relevant.none-task-blog-title-3&spm=1001.2101.3001.4242)
 - [python selenium指定元素截长图](https://cloud.tencent.com/developer/article/1406656)
-- [python class]
 - [python string format](https://www.runoob.com/python/att-string-format.html)
 ```python
 >>>"{} {}".format("hello", "world")    # 不设置指定位置，按默认顺序
@@ -120,5 +119,9 @@ mydict
 - css class selector为`.search .header`(**中间有空格**), 匹配到的是内层element
 
 
-## 省市区地址格式化
-- 模块 cpca 可以获取标准化的省市区地址
+## 有用的库
+- selenium 控制chrome，也可跨平台截全屏图
+- cpca 可以获取标准化的省市区地址
+- pillow 图片截取crop
+- threading 多线程，线程库
+- logging logger
