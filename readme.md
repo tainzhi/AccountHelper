@@ -126,3 +126,4 @@ mydict
 - pillow 图片截取crop
 - threading 多线程，线程库
 - logging logger
+- shelve 简单的持久化到硬盘，dict类型

@@ -60,13 +60,13 @@ def handle(excel, window):
         t.start()
 
 
-def run_ui():
+def run_ui(config):
     sg.theme('Light Brown 3')
     current_dir = os.path.dirname(os.path.abspath(__file__))
     icon = os.path.join(current_dir, 'account.icon')
     layout = [
         [sg.Text("选择一个excel文件")],
-        [sg.Input(key="-browsed-excel-", change_submits=True),
+        [sg.Input(key="-browsed-excel-", change_submits=True, default_text=config.get_recent_excel()),
          sg.FileBrowse(key="-browse-", initial_folder=current_dir,
                        file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx")))],
         [sg.Text("加速等级"), sg.InputCombo(values=('normal', 'fast', 'faster'), size=(10, 3)),
@@ -92,10 +92,13 @@ def run_ui():
         event, values = window.read()
         # 退出窗口程序
         if event == sg.WIN_CLOSED or event == "Exit":
+            # 保存设置
+            config.close()
             break
         # 选择excel后
         elif event == '-browsed-excel-' and values['-browsed-excel-'] is not None:
-            print(values['-browsed-excel-'])
+            # 保存最近的excel记录
+            config.save_recent_excel(values['-browsed-excel-'])
         elif event == '-Chrome State-':
             window['-STATE-'].update(values[event])
         elif event == "-start-":
@@ -117,4 +120,5 @@ def test_no_ui():
 
 if __name__ == "__main__":
     util.Util.set_up_log_config()
-    run_ui()
+    config = util.Config()
+    run_ui(config)
