@@ -15,6 +15,7 @@ pathlib = "*"
 pysimplegui = "*"
 cpca = "*"
 pyyaml = "*"
+redis = "*"
 
 [dev-packages]
 

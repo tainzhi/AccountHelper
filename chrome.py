@@ -9,7 +9,6 @@ import pickle
 import util
 import logging
 
-
 class Chrome:
     __driver = None
     __window = None
@@ -17,6 +16,7 @@ class Chrome:
     __cookie_dir = util.PathUtil.get_cookie_dir()
     __cookie_name = 'chrome.cookie'
     __driver_location = util.PathUtil.get_driver_location()
+    __screenshot_dir = util.PathUtil.get_save_picture_dir()
     __logger = logging.getLogger("chrome")
 
     # 初始化, 并加载 天眼查根目录
@@ -98,9 +98,9 @@ class Chrome:
     def read_cookie(self, cookie_path):
         return
 
-    def save_pic(self, pic_root_dir, company):
+    def check_and_screenshot(self, company):
         """
-        截图后， crop成指定大小
+        比较company_address和天眼查上地址是否相同， 并截屏，裁剪
         :param pic_root_dir:
         :param company:
         :return:
@@ -111,7 +111,8 @@ class Chrome:
 
         self.__driver.get("https://www.tianyancha.com/search?key={value}".format(value=company_name))
         # 获取第一条记录的公司的超链接
-        company_url = self.__driver.find_element_by_css_selector(".name,[tyc-event-ch='CompanySearch.Company']").get_attribute('href')
+        company_url = self.__driver.find_element_by_css_selector(
+            ".name,[tyc-event-ch='CompanySearch.Company']").get_attribute('href')
         self.__driver.get(company_url)
         detail_address = self.__driver.find_element_by_css_selector('.detail-content').text
         detail_element = self.__driver.find_element_by_css_selector('.box > .content')
@@ -124,17 +125,26 @@ class Chrome:
         rect = (left, top, right, bottom)
         saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
         # 最终保存的图片路径
-        saved_image_path = os.path.join(pic_root_dir, saved_image_path)
+        saved_image_path = os.path.join(self.__screenshot_dir, saved_image_path)
         self.__driver.save_screenshot(saved_image_path)
         if util.IS_CROP_IMAGE:
-            try:
-                im = Image.open(saved_image_path)
-                cropped_image = im.crop(rect)
-                cropped_image.save(saved_image_path)
-            except OSError:
-                print(OSError.strerror)
-        ret_company = numpy.append(company, [detail_address, util.Util.is_same_address(company_address, detail_address)])
+            # 异步截图，提升速度
+            util.thread_pool.submit(
+                                    self.crop_picture,
+                                    saved_image_path, rect
+                                    )
+        ret_company = numpy.append(company,
+                                   [detail_address, util.Util.is_same_address(company_address, detail_address)])
         return ret_company
+
+    def crop_picture(self, image_path, rect):
+        self.__logger.info("crop picture")
+        try:
+            im = Image.open(image_path)
+            cropped_image = im.crop(rect)
+            cropped_image.save(image_path)
+        except OSError:
+            print(OSError.strerror)
 
     def quit(self):
         # quit Chrome browser

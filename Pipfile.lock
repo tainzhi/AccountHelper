@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4f09f59848e203e1f415b00576869c4b41168c75a63c99337eea6eeacf3ba6ed"
+            "sha256": "8dcec7f7997941620109ef229112e9dcab2cbdf6d86a082cec1413c739272a2f"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -172,11 +172,11 @@
         },
         "pysimplegui": {
             "hashes": [
-                "sha256:181b9e65e9ddb4e85c1f0ffaff0d0c7ade0d1571158a4a979ebd4e006d870533",
-                "sha256:9d8e6b8c4996c2478191b66559f00ef25f366e17ed709b5f6aa6a35a8f490e4f"
+                "sha256:042de18776f59f10f4ea3947028b5fe0644c4cb5ff152d0494351740b17d609b",
+                "sha256:302441eb1342bda17612ad01326cb86cc5c9793d0299362c103e18b461908a2a"
             ],
             "index": "aliyun",
-            "version": "==4.30.0"
+            "version": "==4.31.0"
         },
         "python-dateutil": {
             "hashes": [
@@ -209,6 +209,14 @@
             "index": "aliyun",
             "version": "==5.3.1"
         },
+        "redis": {
+            "hashes": [
+                "sha256:0e7e0cfca8660dea8b7d5cd8c4f6c5e29e11f31158c0b0ae91a397f00e5a05a2",
+                "sha256:432b788c4530cfe16d8d943a09d40ca6c16149727e4afe8c2c9d5580c59d9f24"
+            ],
+            "index": "aliyun",
+            "version": "==3.5.3"
+        },
         "selenium": {
             "hashes": [
                 "sha256:2d7131d7bc5a5b99a2d9b04aaf2612c411b03b8ca1b1ee8d3de5845a9be2cb3c",
@@ -227,11 +235,11 @@
         },
         "urllib3": {
             "hashes": [
-                "sha256:097116a6f16f13482d2a2e56792088b9b2920f4eb6b4f84a2c90555fb673db74",
-                "sha256:61ad24434555a42c0439770462df38b47d05d9e8e353d93ec3742900975e3e65"
+                "sha256:19188f96923873c92ccb987120ec4acaa12f0461fa9ce5d3d0772bc965a39e08",
+                "sha256:d8ff90d979214d7b4f8ce956e80f4028fc6860e4431f731ea4a8c08f23f99473"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
-            "version": "==1.26.1"
+            "version": "==1.26.2"
         },
         "xlrd": {
             "hashes": [

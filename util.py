@@ -5,10 +5,19 @@ from platform import system
 import logging
 import logging.config
 import yaml
+from concurrent.futures import ThreadPoolExecutor
 
 # 是否对selenium截的全屏图裁剪, 默认截全屏图
-IS_CROP_IMAGE = False
+IS_CROP_IMAGE = True
 
+thread_pool = ThreadPoolExecutor(5)
+thread_count = 1
+
+
+# redis参数设置
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+REDIS_PASSWORD = None
 
 class Util:
 	@staticmethod
