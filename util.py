@@ -12,7 +12,7 @@ import shelve
 IS_CROP_IMAGE = True
 
 thread_pool = ThreadPoolExecutor(5)
-thread_count = 1
+thread_count = 2
 
 # redis参数设置
 REDIS_HOST = '127.0.0.1'

@@ -2,7 +2,7 @@ version: 1
 disable_existing_loggers: False
 formatters:
     simple:
-        format: "%(asctime)s - %(name)s - %(levelname)s - %(thread)d - %(threadName)s - %(message)s"
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(threadName)s - %(message)s"
 handlers:
     console:
         class: logging.StreamHandler
@@ -32,6 +32,15 @@ path:
         handlers: [info_file_handler]
         propagate: no
     Util:
+        level: INFO
+        handlers: [info_file_handler]
+        propagate: no
+browser:
+    QiChaCha:
+        level: INFO
+        handlers: [info_file_handler]
+        propagate: no
+    TianYanCha:
         level: INFO
         handlers: [info_file_handler]
         propagate: no

@@ -3,7 +3,8 @@ import pandas as pd
 import PySimpleGUI as sg
 import threading
 import util
-from chrome import Chrome
+from browser import TianYanCha
+from browser import QiChaCha
 
 
 def read_excel(excel_file):
@@ -27,37 +28,57 @@ def write_excel(companies):
     writer.save()
 
 
-def process_by_thread(companies, window):
-    chrome = Chrome('https://www.tianyancha.com/', window)
+def handle_by_qcc(companies, window, result_list):
+    chrome = QiChaCha(window)
     all_count = len(companies)
     index = 0
     for com in companies:
         index += 1
         ret_com = chrome.check_and_screenshot(com)
+        result_list.append(ret_com)
+    # print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
+    chrome.quit()
+
+
+def handle_by_tianyancha(companies, window, result_list):
+    chrome = TianYanCha(window)
+    index = 0
+    for com in companies:
+        index += 1
+        ret_com = chrome.check_and_screenshot(com)
+        result_list.append(ret_com)
     # print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
     chrome.quit()
 
 
 def handle(excel, window):
     companies = read_excel(excel)
-    # 登录，并保存cookie
-    chrome = Chrome('https://www.tianyancha.com/', window)
-    chrome.quit()
-    # processed = []
-    # processed.append(ret_com)
-    # write_excel(processed)
-    thread_count = util.thread_count
-    splited_commpanes = util.Util.split_list_average_n(companies, thread_count)
-    threads = []
-    # 开启daemon线程
+    # 登录企查查，并保存cookie
+    qcc = QiChaCha(window)
+    qcc.quit()
+    # 登录天眼查，并保存cookie
+    tianyancha = TianYanCha(window)
+    tianyancha.quit()
+
+    result_list = []
+
+    # 企查查和天眼查两组
+    # 每组 thread_count 个线程
+    list_count = util.thread_count * 2
+    splited_commpanes = util.Util.split_list_average_n(companies, list_count)
+    # 前 thread_count组用 企查查查询
+    # 后 thread_count组用 天眼查查询
+    index = 0
     for com in splited_commpanes:
         t = threading.Thread(
-            target=process_by_thread,
-            args=(com, window,),
+            target= handle_by_qcc if (index < util.thread_count) else handle_by_tianyancha,
+            args=(com, window, result_list),
+            # 开启daemon线程
             daemon=True
         )
-        threads.append(t)
         t.start()
+        index += 1
+    print(result_list)
 
 
 def run_ui(config):
@@ -66,9 +87,9 @@ def run_ui(config):
     icon = os.path.join(current_dir, 'account.icon')
     layout = [
         [sg.Text("选择一个excel文件")],
-        [sg.Input(key="-browsed-excel-", change_submits=True, default_text=config.get_recent_excel()),
-         sg.FileBrowse(key="-browse-", initial_folder=current_dir,
-                       file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx")))],
+        [sg.FileBrowse(key="-browse-", initial_folder=current_dir,
+                       file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx"))),
+         sg.Input(key="-browsed-excel-", size=(63, 1), change_submits=True, default_text=config.get_recent_excel())],
         [sg.Text("加速等级"), sg.InputCombo(values=('normal', 'fast', 'faster'), size=(10, 3)),
          sg.Checkbox('是否截小图', size=(10, 5), default=True)],
         [sg.Text("从第几行开始"),
@@ -88,6 +109,7 @@ def run_ui(config):
                        font=('Helvetica 18'),
                        default_element_size=(40, 1),
                        )
+    last_run_state = '---运行状态---\n'
     while True:
         event, values = window.read()
         # 退出窗口程序
@@ -99,8 +121,9 @@ def run_ui(config):
         elif event == '-browsed-excel-' and values['-browsed-excel-'] is not None:
             # 保存最近的excel记录
             config.save_recent_excel(values['-browsed-excel-'])
-        elif event == '-Chrome State-':
-            window['-STATE-'].update(values[event])
+        elif event == '-run-state-':
+            window[event].update(last_run_state + values[event])
+            last_run_state = last_run_state + values[event] + '\n'
         elif event == "-start-":
             excel_file = values["-browsed-excel-"]
             # 开启daemon线程

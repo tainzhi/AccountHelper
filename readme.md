@@ -70,11 +70,14 @@ https://mirrors.aliyun.com/pypi/simple/
 
 
 ## Todo
-- [添加log， 记录执行记录和错误到文件](https://blog.csdn.net/zywvvd/article/details/87857816)
+- 验证最终的结果，是否全部抓取
+- 抓取时，被网站反爬虫，怎么重新从剩余未抓取的重新抓取，而不是全部从头抓取
+- selenium 使用proxy，我的服务器搭建一个proxy_pool库(git hub上搜索合适 的)
+- docker,docker-comse的用法 https://github.com/notfresh/shorturl_service
 - [添加执行icon和管理员权限盾牌](https://blog.csdn.net/laiyaoditude/article/details/85278037)
-- 企查查多线程操作, 登录使用cookie
+- nuitka打包成exe
 - python async
-- python多线程线程池
+- 架构图
 
 ## python学习
 - [python class](https://www.runoob.com/python3/python3-class.html): Selenium支持跨平台(win10/mac)
@@ -125,5 +128,5 @@ mydict
 - cpca 可以获取标准化的省市区地址
 - pillow 图片截取crop
 - threading 多线程，线程库
-- logging logger
+- [logging logger](https://www.cnblogs.com/qianyuliang/p/7234217.html)
 - shelve 简单的持久化到硬盘，dict类型
