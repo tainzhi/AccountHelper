@@ -14,6 +14,7 @@ pillow = "*"
 pathlib = "*"
 pysimplegui = "*"
 cpca = "*"
+pyyaml = "*"
 
 [dev-packages]
 

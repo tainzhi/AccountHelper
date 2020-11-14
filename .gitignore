@@ -1,8 +1,10 @@
 build/
 dist/
 picture/
+.idea/
 *.png
 *.log
 .DS_Store
+__pycache__/
 
 

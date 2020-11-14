@@ -7,6 +7,7 @@ from selenium import webdriver, common
 from PIL import Image
 import pickle
 import util
+import logging
 
 
 class Chrome:
@@ -16,6 +17,7 @@ class Chrome:
     __cookie_dir = util.PathUtil.get_cookie_dir()
     __cookie_name = 'chrome.cookie'
     __driver_location = util.PathUtil.get_driver_location()
+    __logger = logging.getLogger("chrome")
 
     # 初始化, 并加载 天眼查根目录
     def __init__(self, url, window=None):
@@ -25,6 +27,7 @@ class Chrome:
         self.login()
 
     def login(self):
+        self.__logger.info("login")
         cookie_path = os.path.join(self.__cookie_dir, self.__cookie_name)
         if os.path.exists(cookie_path):
             try:

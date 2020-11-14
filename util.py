@@ -2,6 +2,9 @@ import cpca
 import os
 import sys
 from platform import system
+import logging
+import logging.config
+import yaml
 
 # 是否对selenium截的全屏图裁剪, 默认截全屏图
 IS_CROP_IMAGE = False
@@ -48,13 +51,21 @@ class Util:
 			yield origin_list[i: i + each_count]
 
 	@staticmethod
-	def set_up_log_config():
+	def set_up_log_config(path = "log.yaml",default_level = logging.INFO,env_key = "LOG_CFG"):
 		"""
 		从 ./log/log.yaml加载 logging 配置
 		:return:
 		"""
-		log_config_location = os.path.join(PathUtil.get_executable_path(), 'log', 'log.yaml')
-
+		log_config_location = os.path.join(PathUtil.get_executable_path(), 'log', path)
+		value = os.getenv(env_key, None)
+		if value:
+			path = value
+		if os.path.exists(log_config_location):
+			with open(log_config_location, "r") as f:
+				config = yaml.load(f, Loader=yaml.FullLoader)
+				logging.config.dictConfig(config)
+		else:
+			logging.basicConfig(level=default_level)
 
 class PathUtil:
 	@staticmethod

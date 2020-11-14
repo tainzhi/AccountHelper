@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+import time
 
 if __name__ == "__main__":
     sg.ChangeLookAndFeel('GreenTan')
@@ -10,10 +11,10 @@ if __name__ == "__main__":
     layout = [
         [sg.Text('All graphic widgets in one form!', size=(30, 1), font=("Helvetica", 25))],
         [sg.Text('Here is some text.... and a place to enter text')],
-        [sg.InputText('This is my text')],
+        [sg.InputText( 'This is my text', key="i1")],
         [sg.Checkbox('My first checkbox!'), sg.Checkbox('My second checkbox!', default=True)],
         [sg.Radio('My first Radio!     ', "RADIO1", default=True), sg.Radio('My second Radio!', "RADIO1")],
-        [sg.Multiline(default_text='This is the default Text should you decide not to type anything', size=(35, 3)),
+        [sg.Multiline(key="m1", default_text='This is the default Text should you decide not to type anything', size=(35, 3)),
          sg.Multiline(default_text='A second multi-line', size=(35, 3))],
         [sg.InputCombo(('Combobox 1', 'Combobox 2'), size=(20, 3)),
          sg.Slider(range=(1, 100), orientation='h', size=(34, 20), default_value=85)],
@@ -28,5 +29,10 @@ if __name__ == "__main__":
          sg.InputText('Default Folder'), sg.FolderBrowse()],
         [sg.Submit(), sg.Cancel()]
     ]
+    window = form.Layout(layout)
     while True:
-        button, values = form.Layout(layout).Read()
+        button, values = window.Read()
+        for i in range(100):
+            time.sleep(1)
+            window['m1'].update("i this is new text")
+            window['i1'].update(" input update")

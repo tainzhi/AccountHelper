@@ -36,6 +36,7 @@ https://github.com/PySimpleGUI/PySimpleGUI/blob/master/DemoPrograms/Demo_Img_Vie
 >- logs: 包含log的config文件
 
 ### 1 nuitka
+- [nuikta官方readme怎么选择windows c compiler](https://github.com/Nuitka/Nuitka)
 http://element-ui.cn/python/show-23924.aspx
 https://zhuanlan.zhihu.com/p/133303836
 https://zhuanlan.zhihu.com/p/141810934
