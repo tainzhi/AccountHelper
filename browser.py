@@ -21,7 +21,7 @@ class TianYanCha:
 
     # 初始化, 并加载 天眼查根目录
     def __init__(self, window=None):
-        self.__driver = webdriver.Chrome(self.__driver_location)
+        self.__driver = webdriver.Chrome(self.__driver_location, service_args=['--ignore-ssl-errors=true', '--ssl-protocol=TLSv1'])
         self.__window = window
         self.login()
 
@@ -281,9 +281,9 @@ class QiChaCha:
         self.__driver.get("https://www.qcc.com/search?key={value}".format(value=company_name))
         # 获取第一条记录的公司的超链接
         company_url = self.__driver.find_element_by_css_selector(
-            ".m_srchList .frtrt a").get_attribute('href')
+            ".msearch .frtrt a").get_attribute('href')
         self.__driver.get(company_url)
-        detail_address = self.__driver.find_element_by_css_selector(".row .cvlu a[data-original-title='查看地址']").text
+        detail_address = self.__driver.find_element_by_css_selector(".row .cvlu a[data-original-title]").text
         detail_element = self.__driver.find_element_by_css_selector('.row .content')
         location = detail_element.location
         size = detail_element.size

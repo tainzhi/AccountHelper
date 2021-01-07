@@ -90,7 +90,7 @@ def run_ui(config):
         [sg.FileBrowse(key="-browse-", initial_folder=current_dir,
                        file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx"))),
          sg.Input(key="-browsed-excel-", size=(63, 1), change_submits=True, default_text=config.get_recent_excel())],
-        [sg.Text("加速等级"), sg.InputCombo(values=('normal', 'fast', 'faster'), size=(10, 3)),
+        [sg.Text("加速等级"), sg.InputCombo(key="-speed-", values=('normal', 'fast', 'faster'), size=(10, 3)),
          sg.Checkbox('是否截小图', size=(10, 5), default=True)],
         [sg.Text("从第几行开始"),
          sg.Input(key='-start-row-', change_submits=True, size=(5, 1), justification='right', default_text='2')],

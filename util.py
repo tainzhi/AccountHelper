@@ -1,4 +1,3 @@
-import cpca
 import os
 import sys
 from platform import system
@@ -12,7 +11,7 @@ import shelve
 IS_CROP_IMAGE = True
 
 thread_pool = ThreadPoolExecutor(5)
-thread_count = 2
+thread_count = 1
 
 # redis参数设置
 REDIS_HOST = '127.0.0.1'
@@ -21,34 +20,34 @@ REDIS_PASSWORD = None
 
 
 class Util:
-    @staticmethod
-    def is_same_address(address1, address2):
-        """
-        地址转换后, 格式类似这样的, 省/市/区/地址/邮编, 不存在则为None
-        ['福建省' '泉州市' None '洛江万安塘西工业区安邦路10号' '350500']
-        ['福建省' '泉州市' '洛江区' '万安塘西工业区安邦路9号' '350504']
-        """
-        data = cpca.transform([address1.strip(), address2.strip()]).values
-        # 地址1
-        a1 = data[0]
-        # 地址2
-        a2 = data[1]
-        # 省
-        if a1[0] != a2[0]:
-            return False
-        # 市
-        if a1[1] != a2[1]:
-            return False
-        # 区
-        if a1[2] != a2[2]:
-            return False
-        # 比较详细地址
-        if len(a1[3]) != len(a2[3]):
-            return False
-        for x, y in zip(a1[3], a2[3]):
-            if x != y:
-                return False
-        return True
+    # @staticmethod
+    # def is_same_address(address1, address2):
+    #     """
+    #     地址转换后, 格式类似这样的, 省/市/区/地址/邮编, 不存在则为None
+    #     ['福建省' '泉州市' None '洛江万安塘西工业区安邦路10号' '350500']
+    #     ['福建省' '泉州市' '洛江区' '万安塘西工业区安邦路9号' '350504']
+    #     """
+    #     data = cpca.transform([address1.strip(), address2.strip()]).values
+    #     # 地址1
+    #     a1 = data[0]
+    #     # 地址2
+    #     a2 = data[1]
+    #     # 省
+    #     if a1[0] != a2[0]:
+    #         return False
+    #     # 市
+    #     if a1[1] != a2[1]:
+    #         return False
+    #     # 区
+    #     if a1[2] != a2[2]:
+    #         return False
+    #     # 比较详细地址
+    #     if len(a1[3]) != len(a2[3]):
+    #         return False
+    #     for x, y in zip(a1[3], a2[3]):
+    #         if x != y:
+    #             return False
+    #     return True
 
     @staticmethod
     def split_list_average_n(origin_list, n):
@@ -71,7 +70,7 @@ class Util:
         if value:
             path = value
         if os.path.exists(log_config_location):
-            with open(log_config_location, "r") as f:
+            with open(log_config_location, "rb") as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
                 logging.config.dictConfig(config)
         else:

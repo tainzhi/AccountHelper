@@ -8,14 +8,14 @@ selenium = "*"
 pandas = "*"
 numpy = "==1.19.3"
 xlrd = "*"
-pyinstaller = "*"
+pyinstaller = "==4.1"
 xlsxwriter = "*"
 pillow = "*"
 pathlib = "*"
-pysimplegui = "*"
-cpca = "*"
+pysimplegui = "==4.33.0"
 pyyaml = "*"
 redis = "*"
+openpyxl = "*"
 
 [dev-packages]
 
