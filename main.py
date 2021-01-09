@@ -6,6 +6,7 @@ import util
 from browser import TianYanCha
 from browser import QiChaCha
 import logging
+import numpy as np
 import traceback
 
 
@@ -27,39 +28,67 @@ def read_excel(excel_file):
     return not_blank
 
 
-def write_excel(companies):
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    excels_dir = os.path.join(root_dir, 'excels')
-    writer = pd.ExcelWriter('result.xlsx', engine='xlsxwriter')
-    pd.DataFrame(companies).to_excel(writer, sheet_name='new', index=False)
+def write_excel(excel_file, window):
+    util.thread_count -= 1
+    if util.thread_count > 0:
+        return
+    read = pd.read_excel(excel_file, keep_default_na=False)
+    # 获取所有的行,所有的列
+    original_data = read.iloc[0:, 0:].values
+    # 最后一列添加空格
+    new_data = np.insert(original_data, np.size(original_data, 1), '', axis=1)
+    new_data[1][7] = "new address"
+    index = 2
+    for com in original_data[2:]:
+        # for net_company in [['S00001', "baidu.com"], ['S00002', "com.baidu.com"]]:
+        for net_company in util.haven_dealed_companies:
+            if com[1] == net_company[0]:
+                new_data[index][7] = net_company[-1]
+        index += 1
+    writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+    pd.DataFrame(new_data).to_excel(writer, index=False)
     writer.save()
 
 
-def handle_by_qcc(companies, window, result_list):
+def handle_by_qcc(companies, window, result_list, excel_file):
     chrome = QiChaCha(window)
     all_count = len(companies)
     index = 0
-    for com in companies:
-        index += 1
-        ret_com = chrome.check_and_screenshot(com)
-        if len(ret_com) != 0:
-            result_list.append(ret_com)
-        index = update_progrees_bar(window)
-        update_info(window, index, com)
-    chrome.quit()
+    try:
+        for com in companies:
+            index += 1
+            ret_com = chrome.check_and_screenshot(com)
+            if len(ret_com) != 0:
+                result_list.append(ret_com)
+            index = update_progress_bar(window, ret_com)
+            update_info(window, index, com)
+    except Exception as e:
+        logging.getLogger("main").error(e.args)
+        logging.getLogger("main").error('=====================================')
+        logging.getLogger("main").error(traceback.format_exc())
+    finally:
+        write_excel(excel_file, window)
+        chrome.quit()
 
 
-def handle_by_tianyancha(companies, window, result_list):
+def handle_by_tianyancha(companies, window, result_list, excel_file):
     chrome = TianYanCha(window)
     index = 0
-    for com in companies:
-        index += 1
-        ret_com = chrome.check_and_screenshot(com)
-        if len(ret_com) != 0:
-            result_list.append(ret_com)
-        index = update_progrees_bar(window)
-        update_info(window, index, com)
-    chrome.quit()
+    try:
+        for com in companies:
+            index += 1
+            ret_com = chrome.check_and_screenshot(com)
+            if len(ret_com) != 0:
+                result_list.append(ret_com)
+            index = update_progress_bar(window, ret_com)
+            update_info(window, index, com)
+    except Exception as e:
+        logging.getLogger("main").error(e.args)
+        logging.getLogger("main").error('=====================================')
+        logging.getLogger("main").error(traceback.format_exc())
+    finally:
+        write_excel(excel_file, window)
+        chrome.quit()
 
 
 def update_info(window, index, com):
@@ -67,9 +96,13 @@ def update_info(window, index, com):
     logging.getLogger("main").info(state_info)
     window.write_event_value('-run-state-', state_info)
 
-def update_progrees_bar(window):
+
+def update_progress_bar(window, company):
     util.mutex.acquire()
     util.g_count += 1
+    # 只保存已经从网页中查找到公司
+    if len(company) != 0:
+        util.haven_dealed_companies.append(company)
     util.mutex.release()
     progress_bar = window['-progress-']
     progress_bar.UpdateBar(util.g_count * 100.0 / util.g_sum)
@@ -88,22 +121,19 @@ def handle(excel, window):
 
         result_list = []
         # 企查查和天眼查两组
-        # 每组 thread_count 个线程
-        list_count = util.thread_count * 2
-        splited_commpanes = util.Util.split_list_average_n(companies, list_count)
-        # 前 thread_count组用 企查查查询
-        # 后 thread_count组用 天眼查查询
+        splited_commpanes = util.Util.split_list_average_n(companies, util.thread_count)
+        # 前 thread_count /2 组用 企查查查询
+        # 后 thread_count /2 组用 天眼查查询
         index = 0
         for com in splited_commpanes:
             t = threading.Thread(
-                target= handle_by_qcc if (index < util.thread_count) else handle_by_tianyancha,
-                args=(com, window, result_list),
+                target= handle_by_qcc if (index < util.thread_count / 2) else handle_by_tianyancha,
+                args=(com, window, result_list, excel),
                 # 开启daemon线程
                 daemon=True
             )
             t.start()
             index += 1
-        print(result_list)
     except Exception as e:
         logging.getLogger("main").error(e.args)
         logging.getLogger("main").error('=====================================')
@@ -116,7 +146,7 @@ def check(excel, window, need_show_info):
     # 已经处理的公司名单
     haven_dealed_companies_code = util.PathUtil.get_haven_delead_company_code()
     util.g_count = len(haven_dealed_companies_code)
-    update_progrees_bar(window)
+    update_progress_bar(window, [])
 
     state_info = "总共 {all} 个公司， 已经处理截图了 {dealed} 个公司， 还有 {remain} 个公司待处理"\
         .format(all=len(companies), dealed=len(haven_dealed_companies_code), remain=len(companies) - len(haven_dealed_companies_code))
@@ -192,11 +222,11 @@ def run_ui(config):
 
 def test_no_ui():
     excel_file = './excels/被函证单位信息表（小康动力）.xlsx'
-    content = read_excel(excel_file)
-    print(content)
+    write_excel(excel_file, None)
 
 
 if __name__ == "__main__":
     util.Util.set_up_log_config()
     config = util.Config()
     run_ui(config)
+    # test_no_ui()

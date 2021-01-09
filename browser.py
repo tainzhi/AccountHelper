@@ -107,6 +107,7 @@ class TianYanCha:
         :param company:
         :return:
         """
+        ret_company = []
         try:
             company_code = company[0]
             company_name = company[1]
@@ -137,9 +138,11 @@ class TianYanCha:
                                         saved_image_path, rect
                                         )
             ret_company = numpy.append(company, detail_address)
+        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException) as e:
+            raise e
+        finally:
             return ret_company
-        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException):
-            return []
+
 
     def crop_picture(self, image_path, rect):
         self.__logger.info("crop picture")
@@ -147,8 +150,8 @@ class TianYanCha:
             im = Image.open(image_path)
             cropped_image = im.crop(rect)
             cropped_image.save(image_path)
-        except OSError:
-            print(OSError.strerror)
+        except OSError as e:
+            raise e
 
     def quit(self):
         # quit Chrome browser
@@ -277,6 +280,7 @@ class QiChaCha:
         :param company:
         :return:
         """
+        ret_company = []
         try:
             company_code = company[0]
             company_name = company[1]
@@ -287,7 +291,7 @@ class QiChaCha:
             company_url = self.__driver.find_element_by_css_selector(
                 ".msearch .frtrt a").get_attribute('href')
             self.__driver.get(company_url)
-            detail_address = self.__driver.find_element_by_css_selector(".row .cvlu a[data-original-title]").text
+            detail_address = self.__driver.find_element_by_css_selector(".row .cvlu a[onclick^=showMapModal]").text
             detail_element = self.__driver.find_element_by_css_selector('.row .content')
             location = detail_element.location
             size = detail_element.size
@@ -306,11 +310,11 @@ class QiChaCha:
                     self.crop_picture,
                     saved_image_path, rect
                 )
-            ret_company = numpy.append(company,
-                                       detail_address)
+            ret_company = numpy.append(company, detail_address)
+        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException) as e:
+            raise e
+        finally:
             return ret_company
-        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException):
-            return []
 
     def crop_picture(self, image_path, rect):
         self.__logger.info("crop picture")
