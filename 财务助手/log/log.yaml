@@ -1,0 +1,51 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+    simple:
+        format: "%(asctime)s - %(name)s - %(levelname)s - %(threadName)s - %(message)s"
+handlers:
+    console:
+        class: logging.StreamHandler
+        level: DEBUG
+        formatter: simple
+        stream: ext://sys.stdout
+    info_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: log/info.log
+        maxBytes: 10485760
+        backupCount: 20
+        encoding: utf8
+    error_file_handler:
+        class: logging.handlers.RotatingFileHandler
+        level: ERROR
+        formatter: simple
+        filename: log/errors.log
+        maxBytes: 10485760
+        backupCount: 20
+        encoding: utf8
+# path module logger
+path:
+    PathUtil:
+        level: INFO
+        handlers: [info_file_handler]
+        propagate: no
+    Util:
+        level: INFO
+        handlers: [info_file_handler]
+        propagate: no
+browser:
+    QiChaCha:
+        level: INFO
+        handlers: [info_file_handler]
+        propagate: no
+    TianYanCha:
+        level: INFO
+        handlers: [info_file_handler]
+        propagate: no
+# 默认logger
+root:
+    level: INFO
+    #    handlers: [console,info_file_handler,error_file_handler]
+    handlers: [console,info_file_handler,error_file_handler]

@@ -123,8 +123,8 @@ class TianYanCha:
             size = detail_element.size
             left = location['x']
             top = location['y']
-            right = left + size['width']
-            bottom = top + size['height']
+            right = left + size['width'] + util.other_padding
+            bottom = top + size['height'] + util.other_padding
             rect = (left, top, right, bottom)
             saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
             # 最终保存的图片路径
@@ -293,8 +293,8 @@ class QiChaCha:
             size = detail_element.size
             left = location['x']
             top = location['y']
-            right = left + size['width']
-            bottom = top + size['height']
+            right = left + size['width'] + util.other_padding
+            bottom = top + size['height'] + util.other_padding
             rect = (left, top, right, bottom)
             saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
             # 最终保存的图片路径

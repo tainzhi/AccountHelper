@@ -26,6 +26,9 @@ REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_PASSWORD = None
 
+# 某些记性上，截取不到完整的地址，需要添加一些padding
+other_padding = 200
+
 
 class Util:
     # @staticmethod
