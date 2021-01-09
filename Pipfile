@@ -16,6 +16,7 @@ pysimplegui = "==4.33.0"
 pyyaml = "*"
 redis = "*"
 openpyxl = "*"
+cpca = "*"
 
 [dev-packages]
 

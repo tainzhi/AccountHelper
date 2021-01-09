@@ -5,6 +5,7 @@ import threading
 import util
 from browser import TianYanCha
 from browser import QiChaCha
+import logging
 
 
 def read_excel(excel_file):
@@ -13,11 +14,16 @@ def read_excel(excel_file):
     :param excel:
     :return:
     """
-    read = pd.read_excel(excel_file, skiprows=[0, 1], usecols=['代码', '往来单位名称', '收件地址'])
+    read = pd.read_excel(excel_file, skiprows=[0, 1], usecols=['代码', '往来单位名称', '收件地址'], keep_default_na=False)
     # 获取所有的行,所有的列
     data = read.iloc[0:, 0:]
     # print("获取到所有的值:\n{0}".format(data))  # 格式化输出
-    return data.values
+    not_blank = []
+    # 某些行读取的为Nan Nan Nan空行处理掉
+    for item in data.values:
+        if item[0] != '' and item[1] != '' and item[2] != '':
+            not_blank.append(item)
+    return not_blank
 
 
 def write_excel(companies):
@@ -35,8 +41,10 @@ def handle_by_qcc(companies, window, result_list):
     for com in companies:
         index += 1
         ret_com = chrome.check_and_screenshot(com)
-        result_list.append(ret_com)
-    # print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
+        if len(ret_com) != 0:
+            result_list.append(ret_com)
+        index = update_progrees_bar(window)
+        update_info(window, index, com)
     chrome.quit()
 
 
@@ -46,13 +54,29 @@ def handle_by_tianyancha(companies, window, result_list):
     for com in companies:
         index += 1
         ret_com = chrome.check_and_screenshot(com)
-        result_list.append(ret_com)
-    # print('%{:.0f} 第{}个公司：{}'.format((index * 100.0 / all_count), index, com[2]))
+        if len(ret_com) != 0:
+            result_list.append(ret_com)
+        index = update_progrees_bar(window)
+        update_info(window, index, com)
     chrome.quit()
 
 
+def update_info(window, index, com):
+    state_info = "第{index}公司，{code} {name}".format(index=index, code=com[0], name=com[1])
+    logging.getLogger("main").info(state_info)
+    window.write_event_value('-run-state-', state_info)
+
+def update_progrees_bar(window):
+    util.mutex.acquire()
+    util.g_count += 1
+    util.mutex.release()
+    progress_bar = window['-progress-']
+    progress_bar.UpdateBar(util.g_count * 100.0 / util.g_sum)
+    return util.g_count
+
+
 def handle(excel, window):
-    companies = read_excel(excel)
+    companies = check(excel, window, False)
     # 登录企查查，并保存cookie
     qcc = QiChaCha(window)
     qcc.quit()
@@ -61,7 +85,6 @@ def handle(excel, window):
     tianyancha.quit()
 
     result_list = []
-
     # 企查查和天眼查两组
     # 每组 thread_count 个线程
     list_count = util.thread_count * 2
@@ -79,6 +102,29 @@ def handle(excel, window):
         t.start()
         index += 1
     print(result_list)
+
+
+def check(excel, window, need_show_info):
+    companies = read_excel(excel)
+    util.g_sum = len(companies)
+    # 已经处理的公司名单
+    haven_dealed_companies_code = util.PathUtil.get_haven_delead_company_code()
+    util.g_count = len(haven_dealed_companies_code)
+    update_progrees_bar(window)
+
+    state_info = "总共 {all} 个公司， 已经处理截图了 {dealed} 个公司， 还有 {remain} 个公司待处理"\
+        .format(all=len(companies), dealed=len(haven_dealed_companies_code), remain=len(companies) - len(haven_dealed_companies_code))
+    logging.getLogger("main").info(state_info)
+    window.write_event_value('-run-state-', state_info)
+
+    new_companies = []
+    for com in companies:
+        if com[0] not in haven_dealed_companies_code:
+            new_companies.append(com)
+    if need_show_info:
+        for com in new_companies:
+            window.write_event_value('-run-state-', "未能处理的公司 {} {}".format(com[0], com[1]))
+    return new_companies
 
 
 def run_ui(config):
@@ -133,6 +179,9 @@ def run_ui(config):
                 daemon=True
             )
             thread.start()
+        elif event == "-check-":
+            excel_file = values["-browsed-excel-"]
+            check(excel_file, window, True)
 
 
 def test_no_ui():

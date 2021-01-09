@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from platform import system
 import logging
@@ -6,12 +7,20 @@ import logging.config
 import yaml
 from concurrent.futures import ThreadPoolExecutor
 import shelve
+import threading
+import cpca
 
 # 是否对selenium截的全屏图裁剪, 默认截全屏图
 IS_CROP_IMAGE = True
 
 thread_pool = ThreadPoolExecutor(5)
 thread_count = 1
+
+# 用于统计当前处理的计数器
+g_count = 0
+# 总共要处理的数目
+g_sum = 0
+mutex = threading.Lock()
 
 # redis参数设置
 REDIS_HOST = '127.0.0.1'
@@ -20,34 +29,34 @@ REDIS_PASSWORD = None
 
 
 class Util:
-    # @staticmethod
-    # def is_same_address(address1, address2):
-    #     """
-    #     地址转换后, 格式类似这样的, 省/市/区/地址/邮编, 不存在则为None
-    #     ['福建省' '泉州市' None '洛江万安塘西工业区安邦路10号' '350500']
-    #     ['福建省' '泉州市' '洛江区' '万安塘西工业区安邦路9号' '350504']
-    #     """
-    #     data = cpca.transform([address1.strip(), address2.strip()]).values
-    #     # 地址1
-    #     a1 = data[0]
-    #     # 地址2
-    #     a2 = data[1]
-    #     # 省
-    #     if a1[0] != a2[0]:
-    #         return False
-    #     # 市
-    #     if a1[1] != a2[1]:
-    #         return False
-    #     # 区
-    #     if a1[2] != a2[2]:
-    #         return False
-    #     # 比较详细地址
-    #     if len(a1[3]) != len(a2[3]):
-    #         return False
-    #     for x, y in zip(a1[3], a2[3]):
-    #         if x != y:
-    #             return False
-    #     return True
+    @staticmethod
+    def is_same_address(address1, address2):
+        """
+        地址转换后, 格式类似这样的, 省/市/区/地址/邮编, 不存在则为None
+        ['福建省' '泉州市' None '洛江万安塘西工业区安邦路10号' '350500']
+        ['福建省' '泉州市' '洛江区' '万安塘西工业区安邦路9号' '350504']
+        """
+        data = cpca.transform([address1.strip(), address2.strip()]).values
+        # 地址1
+        a1 = data[0]
+        # 地址2
+        a2 = data[1]
+        # 省
+        if a1[0] != a2[0]:
+            return False
+        # 市
+        if a1[1] != a2[1]:
+            return False
+        # 区
+        if a1[2] != a2[2]:
+            return False
+        # 比较详细地址
+        if len(a1[3]) != len(a2[3]):
+            return False
+        for x, y in zip(a1[3], a2[3]):
+            if x != y:
+                return False
+        return True
 
     @staticmethod
     def split_list_average_n(origin_list, n):
@@ -191,3 +200,19 @@ class PathUtil:
             else:
                 break
         return excels[choose_index]
+
+    @staticmethod
+    def get_haven_delead_company_code():
+        """
+        获取 ./picture 下当前已经获取的公司的图片，用于判断还有哪些公司没有获取，继续获取剩下的公司的图片截图
+        比如已经截取了图片 S00025_重庆民康实业有限公司.png
+        取出 S00025类似的数组， 返回， 方便继续获取还没有处理的公司
+        :return:
+        """
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        picture_dir = os.path.join(root_dir, 'picture')
+        dealed_company_code = []
+        for file in os.listdir(picture_dir):
+            matched = re.search("(\S*)_", file)
+            dealed_company_code.append(matched[1])
+        return dealed_company_code

@@ -106,37 +106,40 @@ class TianYanCha:
         :param company:
         :return:
         """
-        company_code = company[0]
-        company_name = company[1]
-        company_address = company[2]
+        try:
+            company_code = company[0]
+            company_name = company[1]
+            company_address = company[2]
 
-        self.__driver.get("https://www.tianyancha.com/search?key={value}".format(value=company_name))
-        # 获取第一条记录的公司的超链接
-        company_url = self.__driver.find_element_by_css_selector(
-            ".name,[tyc-event-ch='CompanySearch.Company']").get_attribute('href')
-        self.__driver.get(company_url)
-        detail_address = self.__driver.find_element_by_css_selector('.detail-content').text
-        detail_element = self.__driver.find_element_by_css_selector('.box > .content')
-        location = detail_element.location
-        size = detail_element.size
-        left = location['x']
-        top = location['y']
-        right = left + size['width']
-        bottom = top + size['height']
-        rect = (left, top, right, bottom)
-        saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
-        # 最终保存的图片路径
-        saved_image_path = os.path.join(self.__screenshot_dir, saved_image_path)
-        self.__driver.save_screenshot(saved_image_path)
-        if util.IS_CROP_IMAGE:
-            # 异步截图，提升速度
-            util.thread_pool.submit(
-                                    self.crop_picture,
-                                    saved_image_path, rect
-                                    )
-        ret_company = numpy.append(company,
-                                   [detail_address, util.Util.is_same_address(company_address, detail_address)])
-        return ret_company
+            self.__driver.get("https://www.tianyancha.com/search?key={value}".format(value=company_name))
+            # 获取第一条记录的公司的超链接
+            company_url = self.__driver.find_element_by_css_selector(
+                ".name,[tyc-event-ch='CompanySearch.Company']").get_attribute('href')
+            self.__driver.get(company_url)
+            detail_address = self.__driver.find_element_by_css_selector('.detail-content').text
+            detail_element = self.__driver.find_element_by_css_selector('.box > .content')
+            location = detail_element.location
+            size = detail_element.size
+            left = location['x']
+            top = location['y']
+            right = left + size['width']
+            bottom = top + size['height']
+            rect = (left, top, right, bottom)
+            saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
+            # 最终保存的图片路径
+            saved_image_path = os.path.join(self.__screenshot_dir, saved_image_path)
+            self.__driver.save_screenshot(saved_image_path)
+            if util.IS_CROP_IMAGE:
+                # 异步截图，提升速度
+                util.thread_pool.submit(
+                                        self.crop_picture,
+                                        saved_image_path, rect
+                                        )
+            ret_company = numpy.append(company,
+                                       [detail_address, util.Util.is_same_address(company_address, detail_address)])
+            return ret_company
+        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException):
+            return []
 
     def crop_picture(self, image_path, rect):
         self.__logger.info("crop picture")
@@ -274,37 +277,40 @@ class QiChaCha:
         :param company:
         :return:
         """
-        company_code = company[0]
-        company_name = company[1]
-        company_address = company[2]
+        try:
+            company_code = company[0]
+            company_name = company[1]
+            company_address = company[2]
 
-        self.__driver.get("https://www.qcc.com/search?key={value}".format(value=company_name))
-        # 获取第一条记录的公司的超链接
-        company_url = self.__driver.find_element_by_css_selector(
-            ".msearch .frtrt a").get_attribute('href')
-        self.__driver.get(company_url)
-        detail_address = self.__driver.find_element_by_css_selector(".row .cvlu a[data-original-title]").text
-        detail_element = self.__driver.find_element_by_css_selector('.row .content')
-        location = detail_element.location
-        size = detail_element.size
-        left = location['x']
-        top = location['y']
-        right = left + size['width']
-        bottom = top + size['height']
-        rect = (left, top, right, bottom)
-        saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
-        # 最终保存的图片路径
-        saved_image_path = os.path.join(self.__screenshot_dir, saved_image_path)
-        self.__driver.save_screenshot(saved_image_path)
-        if util.IS_CROP_IMAGE:
-            # 异步截图，提升速度
-            util.thread_pool.submit(
-                self.crop_picture,
-                saved_image_path, rect
-            )
-        ret_company = numpy.append(company,
-                                   [detail_address, util.Util.is_same_address(company_address, detail_address)])
-        return ret_company
+            self.__driver.get("https://www.qcc.com/search?key={value}".format(value=company_name))
+            # 获取第一条记录的公司的超链接
+            company_url = self.__driver.find_element_by_css_selector(
+                ".msearch .frtrt a").get_attribute('href')
+            self.__driver.get(company_url)
+            detail_address = self.__driver.find_element_by_css_selector(".row .cvlu a[data-original-title]").text
+            detail_element = self.__driver.find_element_by_css_selector('.row .content')
+            location = detail_element.location
+            size = detail_element.size
+            left = location['x']
+            top = location['y']
+            right = left + size['width']
+            bottom = top + size['height']
+            rect = (left, top, right, bottom)
+            saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
+            # 最终保存的图片路径
+            saved_image_path = os.path.join(self.__screenshot_dir, saved_image_path)
+            self.__driver.save_screenshot(saved_image_path)
+            if util.IS_CROP_IMAGE:
+                # 异步截图，提升速度
+                util.thread_pool.submit(
+                    self.crop_picture,
+                    saved_image_path, rect
+                )
+            ret_company = numpy.append(company,
+                                       [detail_address, util.Util.is_same_address(company_address, detail_address)])
+            return ret_company
+        except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException):
+            return []
 
     def crop_picture(self, image_path, rect):
         self.__logger.info("crop picture")
