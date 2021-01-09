@@ -9,6 +9,7 @@ import pickle
 import util
 import logging
 
+
 class TianYanCha:
     __driver = None
     __window = None
@@ -135,8 +136,7 @@ class TianYanCha:
                                         self.crop_picture,
                                         saved_image_path, rect
                                         )
-            ret_company = numpy.append(company,
-                                       [detail_address, util.Util.is_same_address(company_address, detail_address)])
+            ret_company = numpy.append(company, detail_address)
             return ret_company
         except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException):
             return []
@@ -307,7 +307,7 @@ class QiChaCha:
                     saved_image_path, rect
                 )
             ret_company = numpy.append(company,
-                                       [detail_address, util.Util.is_same_address(company_address, detail_address)])
+                                       detail_address)
             return ret_company
         except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException):
             return []

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1ae65b94a5bb046a68c48705fbd05eedb7e468b5c85c4955eec76dd8d0da21f4"
+            "sha256": "4c566d2f8029c4f508ce82f5f5e344273e713893136e2528f961ccad88b3a623"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -22,14 +22,6 @@
                 "sha256:c623e5f3408ca61d4016f23a681b9adb100802ca3e3da5e718915a9e4052cebe"
             ],
             "version": "==0.17"
-        },
-        "cpca": {
-            "hashes": [
-                "sha256:05e5ecf38b51eeb08f0ef21a6af0c7e89d48d08a7f760d7c54351bed5f70a14a",
-                "sha256:6fb100d844fad64883eca295c3a1553a9c11d078975669a845f3d194655844f5"
-            ],
-            "index": "aliyun",
-            "version": "==0.5.1"
         },
         "et-xmlfile": {
             "hashes": [
@@ -169,12 +161,6 @@
             ],
             "index": "aliyun",
             "version": "==8.1.0"
-        },
-        "pyahocorasick": {
-            "hashes": [
-                "sha256:f9431a20e47e893cadd29f367825e882dbc6fc324a3c24c41e3ff9648e5d04b2"
-            ],
-            "version": "==1.4.0"
         },
         "pyinstaller": {
             "hashes": [

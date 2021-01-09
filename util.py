@@ -8,7 +8,6 @@ import yaml
 from concurrent.futures import ThreadPoolExecutor
 import shelve
 import threading
-import cpca
 
 # 是否对selenium截的全屏图裁剪, 默认截全屏图
 IS_CROP_IMAGE = True
@@ -29,34 +28,34 @@ REDIS_PASSWORD = None
 
 
 class Util:
-    @staticmethod
-    def is_same_address(address1, address2):
-        """
-        地址转换后, 格式类似这样的, 省/市/区/地址/邮编, 不存在则为None
-        ['福建省' '泉州市' None '洛江万安塘西工业区安邦路10号' '350500']
-        ['福建省' '泉州市' '洛江区' '万安塘西工业区安邦路9号' '350504']
-        """
-        data = cpca.transform([address1.strip(), address2.strip()]).values
-        # 地址1
-        a1 = data[0]
-        # 地址2
-        a2 = data[1]
-        # 省
-        if a1[0] != a2[0]:
-            return False
-        # 市
-        if a1[1] != a2[1]:
-            return False
-        # 区
-        if a1[2] != a2[2]:
-            return False
-        # 比较详细地址
-        if len(a1[3]) != len(a2[3]):
-            return False
-        for x, y in zip(a1[3], a2[3]):
-            if x != y:
-                return False
-        return True
+    # @staticmethod
+    # def is_same_address(address1, address2):
+    #     """
+    #     地址转换后, 格式类似这样的, 省/市/区/地址/邮编, 不存在则为None
+    #     ['福建省' '泉州市' None '洛江万安塘西工业区安邦路10号' '350500']
+    #     ['福建省' '泉州市' '洛江区' '万安塘西工业区安邦路9号' '350504']
+    #     """
+    #     data = cpca.transform([address1.strip(), address2.strip()]).values
+    #     # 地址1
+    #     a1 = data[0]
+    #     # 地址2
+    #     a2 = data[1]
+    #     # 省
+    #     if a1[0] != a2[0]:
+    #         return False
+    #     # 市
+    #     if a1[1] != a2[1]:
+    #         return False
+    #     # 区
+    #     if a1[2] != a2[2]:
+    #         return False
+    #     # 比较详细地址
+    #     if len(a1[3]) != len(a2[3]):
+    #         return False
+    #     for x, y in zip(a1[3], a2[3]):
+    #         if x != y:
+    #             return False
+    #     return True
 
     @staticmethod
     def split_list_average_n(origin_list, n):
@@ -91,6 +90,10 @@ class Config:
     __d = None
 
     def __init__(self):
+        root_dir = PathUtil.get_executable_path()
+        base_dir = 'config'
+        if not os.path.exists(base_dir):
+            os.makedirs(base_dir)
         self.__path = os.path.join(PathUtil.get_executable_path(), 'config')
         self.__d = shelve.open(self.__path)
 
@@ -162,7 +165,7 @@ class PathUtil:
         :return:
         """
         os_type = system()
-        root_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = PathUtil.get_executable_path()
         drivers_dir = os.path.join(root_dir, 'drivers')
         if os_type == 'Darwin':
             return os.path.join(drivers_dir, 'chromedriver_mac64')
@@ -181,7 +184,7 @@ class PathUtil:
         从当前目录 excels/ 下选取一个 xlsx
         :return:
         """
-        root_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = PathUtil.get_executable_path()
         excels_dir = os.path.join(root_dir, 'excels')
         excels = []
         for file in os.listdir(excels_dir):
@@ -209,7 +212,7 @@ class PathUtil:
         取出 S00025类似的数组， 返回， 方便继续获取还没有处理的公司
         :return:
         """
-        root_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = PathUtil.get_executable_path()
         picture_dir = os.path.join(root_dir, 'picture')
         dealed_company_code = []
         for file in os.listdir(picture_dir):

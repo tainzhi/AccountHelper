@@ -6,6 +6,7 @@ import util
 from browser import TianYanCha
 from browser import QiChaCha
 import logging
+import traceback
 
 
 def read_excel(excel_file):
@@ -76,32 +77,37 @@ def update_progrees_bar(window):
 
 
 def handle(excel, window):
-    companies = check(excel, window, False)
-    # 登录企查查，并保存cookie
-    qcc = QiChaCha(window)
-    qcc.quit()
-    # 登录天眼查，并保存cookie
-    tianyancha = TianYanCha(window)
-    tianyancha.quit()
+    try:
+        companies = check(excel, window, False)
+        # 登录企查查，并保存cookie
+        qcc = QiChaCha(window)
+        qcc.quit()
+        # 登录天眼查，并保存cookie
+        tianyancha = TianYanCha(window)
+        tianyancha.quit()
 
-    result_list = []
-    # 企查查和天眼查两组
-    # 每组 thread_count 个线程
-    list_count = util.thread_count * 2
-    splited_commpanes = util.Util.split_list_average_n(companies, list_count)
-    # 前 thread_count组用 企查查查询
-    # 后 thread_count组用 天眼查查询
-    index = 0
-    for com in splited_commpanes:
-        t = threading.Thread(
-            target= handle_by_qcc if (index < util.thread_count) else handle_by_tianyancha,
-            args=(com, window, result_list),
-            # 开启daemon线程
-            daemon=True
-        )
-        t.start()
-        index += 1
-    print(result_list)
+        result_list = []
+        # 企查查和天眼查两组
+        # 每组 thread_count 个线程
+        list_count = util.thread_count * 2
+        splited_commpanes = util.Util.split_list_average_n(companies, list_count)
+        # 前 thread_count组用 企查查查询
+        # 后 thread_count组用 天眼查查询
+        index = 0
+        for com in splited_commpanes:
+            t = threading.Thread(
+                target= handle_by_qcc if (index < util.thread_count) else handle_by_tianyancha,
+                args=(com, window, result_list),
+                # 开启daemon线程
+                daemon=True
+            )
+            t.start()
+            index += 1
+        print(result_list)
+    except Exception as e:
+        logging.getLogger("main").error(e.args)
+        logging.getLogger("main").error('=====================================')
+        logging.getLogger("main").error(traceback.format_exc())
 
 
 def check(excel, window, need_show_info):
@@ -137,7 +143,7 @@ def run_ui(config):
                        file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx"))),
          sg.Input(key="-browsed-excel-", size=(63, 1), change_submits=True, default_text=config.get_recent_excel())],
         [sg.Text("加速等级"), sg.InputCombo(key="-speed-", values=('normal', 'fast', 'faster'), size=(10, 3)),
-         sg.Checkbox('是否截小图', size=(10, 5), default=True)],
+         sg.Checkbox('是否截小图', size=(10, 5), default=True, key='-small-picture-')],
         [sg.Text("从第几行开始"),
          sg.Input(key='-start-row-', change_submits=True, size=(5, 1), justification='right', default_text='2')],
         [sg.Text("需要处理的列名称"),
