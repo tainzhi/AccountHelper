@@ -29,9 +29,6 @@ def read_excel(excel_file):
 
 
 def write_excel(excel_file, window):
-    config.thread_count -= 1
-    if config.thread_count > 0:
-        return
     read = pd.read_excel(excel_file, keep_default_na=False)
     # 获取所有的行,所有的列
     original_data = read.iloc[0:, 0:].values
@@ -41,71 +38,76 @@ def write_excel(excel_file, window):
     index = 2
     for com in original_data[2:]:
         # for net_company in [['S00001', "baidu.com"], ['S00002', "com.baidu.com"]]:
-        for net_company in config.haven_dealed_companies:
-            if com[1] == net_company[0]:
-                new_data[index][7] = net_company[-1]
+        for code in config.handled_companies.keys():
+            new_data[index][7] = config.handled_companies[code]
         index += 1
     writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
     pd.DataFrame(new_data).to_excel(writer, index=False)
     writer.save()
 
 
-def handle_by_qcc(companies, window, result_list, excel_file):
+def handle_by_qcc(companies, window):
     chrome = QiChaCha(window)
-    index = 0
     try:
         for com in companies:
-            index += 1
             ret_com = chrome.check_and_screenshot(com)
-            if len(ret_com) != 0:
-                result_list.append(ret_com)
-            index = update_progress_bar(window, ret_com)
-            update_info(window, index, com)
+            update_info(window, ret_com)
     except Exception as e:
         logging.getLogger("main").error(e.args)
         logging.getLogger("main").error('=====================================')
         logging.getLogger("main").error(traceback.format_exc())
     finally:
-        write_excel(excel_file, window)
+        save_handled_companies()
         chrome.quit()
 
 
-def handle_by_tianyancha(companies, window, result_list, excel_file):
+def handle_by_tianyancha(companies, window):
     chrome = TianYanCha(window)
-    index = 0
     try:
         for com in companies:
-            index += 1
             ret_com = chrome.check_and_screenshot(com)
-            if len(ret_com) != 0:
-                result_list.append(ret_com)
-            index = update_progress_bar(window, ret_com)
-            update_info(window, index, com)
+            update_info(window, ret_com)
     except Exception as e:
         logging.getLogger("main").error(e.args)
         logging.getLogger("main").error('=====================================')
         logging.getLogger("main").error(traceback.format_exc())
     finally:
-        write_excel(excel_file, window)
+        save_handled_companies()
         chrome.quit()
 
 
-def update_info(window, index, com):
-    state_info = "第{index}公司，{code} {name}".format(index=index, code=com[0], name=com[1])
-    logging.getLogger("main").info(state_info)
-    window.write_event_value('-run-state-', state_info)
+def save_handled_companies():
+    """
+    多个browser线程执行完毕后，保存已经处理的公司到 db中
+    :return:
+    """
+    config.thread_count -= 1
+    if config.thread_count > 0:
+        return
+    config.db.save_handled_companies(
+        config.handled_companies
+    )
 
 
-def update_progress_bar(window, company):
-    config.mutex.acquire()
-    config.g_count += 1
+def update_info(window, com):
     # 只保存已经从网页中查找到公司
-    if len(company) != 0:
-        config.haven_dealed_companies.append(company)
-    config.mutex.release()
+    if len(com) != 0:
+        state_info = "已处理，{code} {name}".format(code=com[0], name=com[1])
+        logging.getLogger("main").info(state_info)
+        window.write_event_value('-run-state-', state_info)
+
+        config.mutex.acquire()
+        config.g_count += 1
+        # 插入公司代码 : 公司地址(从网络获取的新地址)
+        config.handled_companies.update({com[0]: com[-1]})
+        config.mutex.release()
+        update_progress_bar(window)
+
+
+def update_progress_bar(window):
+    progress = config.g_count * 100.0 / config.g_sum
     progress_bar = window['-progress-']
-    progress_bar.UpdateBar(config.g_count * 100.0 / config.g_sum)
-    return config.g_count
+    progress_bar.UpdateBar(progress)
 
 
 def handle(excel, window):
@@ -118,7 +120,6 @@ def handle(excel, window):
         tianyancha = TianYanCha(window)
         tianyancha.quit()
 
-        result_list = []
         # 企查查和天眼查两组
         splited_commpanes = Util.split_list_average_n(companies, config.thread_count)
         # 前 thread_count /2 组用 企查查查询
@@ -127,7 +128,7 @@ def handle(excel, window):
         for com in splited_commpanes:
             t = threading.Thread(
                 target= handle_by_qcc if (index < config.thread_count / 2) else handle_by_tianyancha,
-                args=(com, window, result_list, excel),
+                args=(com, window),
                 # 开启daemon线程
                 daemon=True
             )
@@ -143,22 +144,21 @@ def check(excel, window, need_show_info):
     companies = read_excel(excel)
     config.g_sum = len(companies)
     # 已经处理的公司名单
-    haven_dealed_companies_code = Util.get_haven_delead_company_code()
-    config.g_count = len(haven_dealed_companies_code)
-    update_progress_bar(window, [])
+    config.g_count = len(config.handled_companies)
+    update_progress_bar(window)
 
-    state_info = "总共 {all} 个公司， 已经处理截图了 {dealed} 个公司， 还有 {remain} 个公司待处理"\
-        .format(all=len(companies), dealed=len(haven_dealed_companies_code), remain=len(companies) - len(haven_dealed_companies_code))
+    state_info = "总共 {all} 个公司， 已经处理截图了 {dealed} 个， 还有 {remain} 个待处理"\
+        .format(all=len(companies), dealed=config.g_count, remain=len(companies) - config.g_count)
     logging.getLogger("main").info(state_info)
     window.write_event_value('-run-state-', state_info)
 
     new_companies = []
     for com in companies:
-        if com[0] not in haven_dealed_companies_code:
+        if com[0] not in config.handled_companies.keys():
             new_companies.append(com)
     if need_show_info:
         for com in new_companies:
-            window.write_event_value('-run-state-', "未能处理的公司 {} {}".format(com[0], com[1]))
+            window.write_event_value('-run-state-', "未能处理 {} {}".format(com[0], com[1]))
     return new_companies
 
 
@@ -171,8 +171,10 @@ def run_ui(db):
         [sg.FileBrowse(key="-browse-", initial_folder=current_dir,
                        file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx"))),
          sg.Input(key="-browsed-excel-", size=(63, 1), change_submits=True, default_text=db.get_recent_excel())],
-        [sg.Text("加速等级"), sg.InputCombo(key="-speed-", values=('normal', 'fast', 'faster'), size=(10, 3)),
-         sg.Checkbox('是否截小图', size=(10, 5), default=True, key='-small-picture-')],
+        [sg.Text("加速等级"), sg.InputCombo(key="-speed-", default_value='normal', values=('normal', 'fast', 'faster'), enable_events=True, size=(10, 3)),
+         sg.Checkbox('是否登录企查查/天眼查', size=(18, 5), default=True, key='-login-browser-'),
+         sg.Checkbox('是否截小图', size=(10, 5), default=True, key='-small-picture-'),
+         ],
         [sg.Text("从第几行开始"),
          sg.Input(key='-start-row-', change_submits=True, size=(5, 1), justification='right', default_text='2')],
         [sg.Text("需要处理的列名称"),
@@ -217,6 +219,17 @@ def run_ui(db):
         elif event == "-check-":
             excel_file = values["-browsed-excel-"]
             check(excel_file, window, True)
+        elif event == "-save-":
+            excel_file = values["-browsed-excel-"]
+            write_excel(excel_file, window)
+        elif event == "-speed-":
+            speed = values['-speed-']
+            if speed == 'normal':
+                config.thread_count = 2
+            elif speed == 'fast':
+                config.thread_count = 4
+            elif speed == 'faster':
+                config.thread_count = 8
 
 
 def test_no_ui():

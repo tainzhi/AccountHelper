@@ -35,5 +35,15 @@ class Db:
     def save_browser_cookie(self, browser_name, cookie):
         self.__d[browser_name] = cookie
 
+    def save_handled_companies(self, companies):
+        self.__d['handled_company'] = companies
+
+    def get_handled_companies(self):
+        try:
+            companies = self.__d['handled_company']
+            return companies
+        except KeyError:
+            return dict()
+
     def close(self):
         self.__d.close()

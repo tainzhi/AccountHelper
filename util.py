@@ -5,8 +5,8 @@ from platform import system
 import logging
 import logging.config
 import yaml
-from concurrent.futures import ThreadPoolExecutor
-import threading
+
+
 class Util:
     @staticmethod
     def split_list_average_n(origin_list, n):

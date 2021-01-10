@@ -20,7 +20,7 @@ g_count = 0
 # 总共要处理的数目
 g_sum = 0
 mutex = threading.Lock()
-haven_dealed_companies = []
+handled_companies = db.get_handled_companies()
 
 # redis参数设置
 REDIS_HOST = '127.0.0.1'
