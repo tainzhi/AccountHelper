@@ -28,3 +28,5 @@ REDIS_PASSWORD = None
 
 # 某些记性上，截取不到完整的地址，需要添加一些padding
 other_padding = 200
+
+divider = '=' * 50

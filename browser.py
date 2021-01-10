@@ -22,6 +22,7 @@ class TianYanCha:
     # 初始化, 并加载 天眼查根目录
     def __init__(self, window=None):
         self.__driver = webdriver.Chrome(self.__driver_location, service_args=['--ignore-ssl-errors=true', '--ssl-protocol=TLSv1'])
+        self.__driver.maximize_window()
         self.__window = window
         if config.db.get_need_login():
             self.login()
@@ -134,10 +135,11 @@ class TianYanCha:
                                         )
             ret_company = numpy.append(company, detail_address)
         except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException) as e:
+            # 等待5s，方便输入验证码
+            time.sleep(5)
             raise e
         finally:
             return ret_company
-
 
     def crop_picture(self, image_path, rect):
         self.__logger.info("crop picture")
@@ -180,6 +182,7 @@ class TianYanCha:
                 time.sleep(1)
                 f = False
 
+
 class QiChaCha:
     __driver = None
     __window = None
@@ -192,6 +195,7 @@ class QiChaCha:
     # 初始化, 并加载 天眼查根目录
     def __init__(self, window=None):
         self.__driver = webdriver.Chrome(self.__driver_location)
+        self.__driver.maximize_window()
         self.__window = window
         if config.db.get_need_login():
             self.login()
@@ -302,6 +306,7 @@ class QiChaCha:
                 )
             ret_company = numpy.append(company, detail_address)
         except (common.exceptions.NoSuchElementException, common.exceptions.ElementNotInteractableException) as e:
+            time.sleep(5)
             raise e
         finally:
             return ret_company
