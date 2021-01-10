@@ -2,18 +2,18 @@ import os
 import pandas as pd
 import PySimpleGUI as sg
 import threading
-import util
 from browser import TianYanCha
 from browser import QiChaCha
 import logging
 import numpy as np
 import traceback
+from util import Util
+import config
 
 
 def read_excel(excel_file):
     """
     读取excel, 调过第0,1 行, 提取列为 代码, 往来单位名称, 收件地址
-    :param excel:
     :return:
     """
     read = pd.read_excel(excel_file, skiprows=[0, 1], usecols=['代码', '往来单位名称', '收件地址'], keep_default_na=False)
@@ -29,8 +29,8 @@ def read_excel(excel_file):
 
 
 def write_excel(excel_file, window):
-    util.thread_count -= 1
-    if util.thread_count > 0:
+    config.thread_count -= 1
+    if config.thread_count > 0:
         return
     read = pd.read_excel(excel_file, keep_default_na=False)
     # 获取所有的行,所有的列
@@ -41,7 +41,7 @@ def write_excel(excel_file, window):
     index = 2
     for com in original_data[2:]:
         # for net_company in [['S00001', "baidu.com"], ['S00002', "com.baidu.com"]]:
-        for net_company in util.haven_dealed_companies:
+        for net_company in config.haven_dealed_companies:
             if com[1] == net_company[0]:
                 new_data[index][7] = net_company[-1]
         index += 1
@@ -52,7 +52,6 @@ def write_excel(excel_file, window):
 
 def handle_by_qcc(companies, window, result_list, excel_file):
     chrome = QiChaCha(window)
-    all_count = len(companies)
     index = 0
     try:
         for com in companies:
@@ -98,15 +97,15 @@ def update_info(window, index, com):
 
 
 def update_progress_bar(window, company):
-    util.mutex.acquire()
-    util.g_count += 1
+    config.mutex.acquire()
+    config.g_count += 1
     # 只保存已经从网页中查找到公司
     if len(company) != 0:
-        util.haven_dealed_companies.append(company)
-    util.mutex.release()
+        config.haven_dealed_companies.append(company)
+    config.mutex.release()
     progress_bar = window['-progress-']
-    progress_bar.UpdateBar(util.g_count * 100.0 / util.g_sum)
-    return util.g_count
+    progress_bar.UpdateBar(config.g_count * 100.0 / config.g_sum)
+    return config.g_count
 
 
 def handle(excel, window):
@@ -121,13 +120,13 @@ def handle(excel, window):
 
         result_list = []
         # 企查查和天眼查两组
-        splited_commpanes = util.Util.split_list_average_n(companies, util.thread_count)
+        splited_commpanes = Util.split_list_average_n(companies, config.thread_count)
         # 前 thread_count /2 组用 企查查查询
         # 后 thread_count /2 组用 天眼查查询
         index = 0
         for com in splited_commpanes:
             t = threading.Thread(
-                target= handle_by_qcc if (index < util.thread_count / 2) else handle_by_tianyancha,
+                target= handle_by_qcc if (index < config.thread_count / 2) else handle_by_tianyancha,
                 args=(com, window, result_list, excel),
                 # 开启daemon线程
                 daemon=True
@@ -142,10 +141,10 @@ def handle(excel, window):
 
 def check(excel, window, need_show_info):
     companies = read_excel(excel)
-    util.g_sum = len(companies)
+    config.g_sum = len(companies)
     # 已经处理的公司名单
-    haven_dealed_companies_code = util.PathUtil.get_haven_delead_company_code()
-    util.g_count = len(haven_dealed_companies_code)
+    haven_dealed_companies_code = Util.get_haven_delead_company_code()
+    config.g_count = len(haven_dealed_companies_code)
     update_progress_bar(window, [])
 
     state_info = "总共 {all} 个公司， 已经处理截图了 {dealed} 个公司， 还有 {remain} 个公司待处理"\
@@ -163,7 +162,7 @@ def check(excel, window, need_show_info):
     return new_companies
 
 
-def run_ui(config):
+def run_ui(db):
     sg.theme('Light Brown 3')
     current_dir = os.path.dirname(os.path.abspath(__file__))
     icon = os.path.join(current_dir, 'account.icon')
@@ -171,7 +170,7 @@ def run_ui(config):
         [sg.Text("选择一个excel文件")],
         [sg.FileBrowse(key="-browse-", initial_folder=current_dir,
                        file_types=(("excel", "*.xlsx"), ("ALL Files", "*.xlsx"))),
-         sg.Input(key="-browsed-excel-", size=(63, 1), change_submits=True, default_text=config.get_recent_excel())],
+         sg.Input(key="-browsed-excel-", size=(63, 1), change_submits=True, default_text=db.get_recent_excel())],
         [sg.Text("加速等级"), sg.InputCombo(key="-speed-", values=('normal', 'fast', 'faster'), size=(10, 3)),
          sg.Checkbox('是否截小图', size=(10, 5), default=True, key='-small-picture-')],
         [sg.Text("从第几行开始"),
@@ -181,7 +180,7 @@ def run_ui(config):
          sg.Input(key='-col-1-', size=(10, 1), pad=(1, 1), justification='center', default_text="公司名称"),
          sg.Input(key='-col-2-', size=(10, 1), pad=(1, 1), justification='center', default_text="地址")],
 
-        [sg.Button("开始", key='-start-'), sg.Button("检查", key='-check-')],
+        [sg.Button("开始", key='-start-'), sg.Button("检查", key='-check-'), sg.Button("写入", key='-save-')],
         [sg.Text("当前进度")],
         [sg.ProgressBar(100, orientation='h', size=(100, 20), key="-progress-")],
         [sg.Text("运行状态")],
@@ -197,12 +196,12 @@ def run_ui(config):
         # 退出窗口程序
         if event == sg.WIN_CLOSED or event == "Exit":
             # 保存设置
-            config.close()
+            db.close()
             break
         # 选择excel后
         elif event == '-browsed-excel-' and values['-browsed-excel-'] is not None:
             # 保存最近的excel记录
-            config.save_recent_excel(values['-browsed-excel-'])
+            db.save_recent_excel(values['-browsed-excel-'])
         elif event == '-run-state-':
             window[event].update(last_run_state + values[event])
             last_run_state = last_run_state + values[event] + '\n'
@@ -211,7 +210,7 @@ def run_ui(config):
             # 开启daemon线程
             thread = threading.Thread(
                 target=handle,
-                args=(excel_file, window,),
+                args=(excel_file, window),
                 daemon=True
             )
             thread.start()
@@ -226,7 +225,7 @@ def test_no_ui():
 
 
 if __name__ == "__main__":
-    util.Util.set_up_log_config()
-    config = util.Config()
-    run_ui(config)
+    Util.set_up_log()
+    db = config.db
+    run_ui(db)
     # test_no_ui()

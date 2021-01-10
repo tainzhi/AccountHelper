@@ -5,19 +5,18 @@ import time
 import numpy
 from selenium import webdriver, common
 from PIL import Image
-import pickle
-import util
+import config
 import logging
+from util import Util
 
 
 class TianYanCha:
     __driver = None
     __window = None
     __url = 'https://www.tianyancha.com/'
-    __cookie_dir = util.PathUtil.get_cookie_dir()
     __cookie_name = 'tianyancha.cookie'
-    __driver_location = util.PathUtil.get_driver_location()
-    __screenshot_dir = util.PathUtil.get_save_picture_dir()
+    __driver_location = Util.get_driver_location()
+    __screenshot_dir = Util.get_save_picture_dir()
     __logger = logging.getLogger("TianYanCha")
 
     # 初始化, 并加载 天眼查根目录
@@ -28,27 +27,24 @@ class TianYanCha:
 
     def login(self):
         self.__logger.info("login")
-        cookie_path = os.path.join(self.__cookie_dir, self.__cookie_name)
-        if os.path.exists(cookie_path):
+        cookie = config.db.get_browser_cookie(self.__cookie_name)
+        if cookie is not None:
             try:
                 self.__driver.get(self.__url)
-                open_file = open(cookie_path, 'rb')
-                cookies = pickle.load(open_file)
-                open_file.close()
-                for co in cookies:
+                for co in cookie:
                     self.__driver.add_cookie(co)
                 self.__driver.get(self.__url)
                 self.__driver.implicitly_wait(5)
                 if self.is_login():
                     return
                 else:
-                    self.login_get_cookie(cookie_path)
+                    self.login_get_cookie()
             except EOFError:
-                self.login_get_cookie(cookie_path)
+                self.login_get_cookie()
         else:
-            self.login_get_cookie(cookie_path)
+            self.login_get_cookie()
 
-    def login_get_cookie(self, cookie_path):
+    def login_get_cookie(self):
         # 没有登录成功
         # 我在开发的时候， 刚好在双十一， 一进入该页面， 会弹出一个促销dialog， 故需要close
         self.__driver.get(self.__url)
@@ -82,10 +78,8 @@ class TianYanCha:
         #     'secure': False
         # }
         cookie = self.__driver.get_cookies()
-        open_file = open(cookie_path, 'wb')
-        pickle.dump(cookie, open_file)
-        open_file.close()
-        print(cookie)
+        # 保存cookie
+        config.db.save_browser_cookie(self.__cookie_name, cookie)
 
     def is_login(self):
         try:
@@ -124,16 +118,16 @@ class TianYanCha:
             size = detail_element.size
             left = location['x']
             top = location['y']
-            right = left + size['width'] + util.other_padding
-            bottom = top + size['height'] + util.other_padding
+            right = left + size['width'] + config.other_padding
+            bottom = top + size['height'] + config.other_padding
             rect = (left, top, right, bottom)
             saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
             # 最终保存的图片路径
             saved_image_path = os.path.join(self.__screenshot_dir, saved_image_path)
             self.__driver.save_screenshot(saved_image_path)
-            if util.IS_CROP_IMAGE:
+            if config.IS_CROP_IMAGE:
                 # 异步截图，提升速度
-                util.thread_pool.submit(
+                config.thread_pool.submit(
                                         self.crop_picture,
                                         saved_image_path, rect
                                         )
@@ -189,10 +183,9 @@ class QiChaCha:
     __driver = None
     __window = None
     __url = 'https://www.qcc.com'
-    __cookie_dir = util.PathUtil.get_cookie_dir()
     __cookie_name = 'qichacha.cookie'
-    __driver_location = util.PathUtil.get_driver_location()
-    __screenshot_dir = util.PathUtil.get_save_picture_dir()
+    __driver_location = Util.get_driver_location()
+    __screenshot_dir = Util.get_save_picture_dir()
     __logger = logging.getLogger("QiChaCha")
 
     # 初始化, 并加载 天眼查根目录
@@ -203,15 +196,12 @@ class QiChaCha:
 
     def login(self):
         self.__logger.info("login")
-        cookie_path = os.path.join(self.__cookie_dir, self.__cookie_name)
-        if os.path.exists(cookie_path):
+        cookie = config.db.get_browser_cookie(self.__cookie_name)
+        if cookie is not None:
             self.__logger.info("QiChaCha cookie exists")
             try:
                 self.__driver.get(self.__url)
-                open_file = open(cookie_path, 'rb')
-                cookies = pickle.load(open_file)
-                open_file.close()
-                for co in cookies:
+                for co in cookie:
                     self.__driver.add_cookie(co)
                 self.__driver.get(self.__url)
                 self.__driver.implicitly_wait(5)
@@ -219,15 +209,15 @@ class QiChaCha:
                     return
                 else:
                     self.__logger.error("QiChaCha cookie invalid, need re login")
-                    self.login_get_cookie(cookie_path)
+                    self.login_get_cookie()
             except EOFError:
                 self.__logger.exception("login by cookie failed")
-                self.login_get_cookie(cookie_path)
+                self.login_get_cookie()
         else:
             self.__logger.info("QiChaCha cookie not exists")
-            self.login_get_cookie(cookie_path)
+            self.login_get_cookie()
 
-    def login_get_cookie(self, cookie_path):
+    def login_get_cookie(self):
         self.__logger.info("login by Scan QR， to Scan QR")
         # 没有登录成功
         # 我在开发的时候， 刚好在双十一， 一进入该页面， 会弹出一个促销dialog， 故需要close
@@ -256,9 +246,7 @@ class QiChaCha:
         #     'secure': False
         # }
         cookie = self.__driver.get_cookies()
-        open_file = open(cookie_path, 'wb')
-        pickle.dump(cookie, open_file)
-        open_file.close()
+        config.db.save_browser_cookie(self.__cookie_name, cookie)
         self.__window.write_event_value('-run-state-', "登录成功")
         self.__logger.info("login by Scan QR， after Scan QR， saved cookie")
 
@@ -297,16 +285,16 @@ class QiChaCha:
             size = detail_element.size
             left = location['x']
             top = location['y']
-            right = left + size['width'] + util.other_padding
-            bottom = top + size['height'] + util.other_padding
+            right = left + size['width'] + config.other_padding
+            bottom = top + size['height'] + config.other_padding
             rect = (left, top, right, bottom)
             saved_image_path = "{code}_{name}.png".format(code=company_code, name=company_name)
             # 最终保存的图片路径
             saved_image_path = os.path.join(self.__screenshot_dir, saved_image_path)
             self.__driver.save_screenshot(saved_image_path)
-            if util.IS_CROP_IMAGE:
+            if config.IS_CROP_IMAGE:
                 # 异步截图，提升速度
-                util.thread_pool.submit(
+                config.thread_pool.submit(
                     self.crop_picture,
                     saved_image_path, rect
                 )
