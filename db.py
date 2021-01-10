@@ -42,7 +42,7 @@ class Db:
         try:
             companies = self.__d['handled_company']
             return companies
-        except KeyError:
+        except (KeyError, EOFError) as e:
             return dict()
 
     def close(self):

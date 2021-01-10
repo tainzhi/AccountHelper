@@ -38,8 +38,8 @@ def write_excel(excel_file, window):
     index = 2
     for com in original_data[2:]:
         # for net_company in [['S00001', "baidu.com"], ['S00002', "com.baidu.com"]]:
-        for code in config.handled_companies.keys():
-            new_data[index][7] = config.handled_companies[code]
+        if com[1] in config.handled_companies.keys():
+            new_data[index][7] = config.handled_companies[com[1]]
         index += 1
     writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
     pd.DataFrame(new_data).to_excel(writer, index=False)
@@ -239,6 +239,6 @@ def test_no_ui():
 
 if __name__ == "__main__":
     Util.set_up_log()
-    db = config.db
-    run_ui(db)
+    config.handled_companies = config.db.get_handled_companies()
+    run_ui(config.db)
     # test_no_ui()

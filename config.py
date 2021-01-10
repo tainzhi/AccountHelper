@@ -7,7 +7,6 @@ from db import Db
 # 已经爬取的公司信息
 db = Db()
 
-
 # 是否对selenium截的全屏图裁剪, 默认截全屏图
 IS_CROP_IMAGE = True
 
@@ -20,7 +19,7 @@ g_count = 0
 # 总共要处理的数目
 g_sum = 0
 mutex = threading.Lock()
-handled_companies = db.get_handled_companies()
+handled_companies = dict()
 
 # redis参数设置
 REDIS_HOST = '127.0.0.1'
