@@ -14,6 +14,17 @@ class Db:
         self.__path = os.path.join(root_dir, config_name)
         self.__d = shelve.open(self.__path)
 
+    def get_need_login(self):
+        try:
+            need = self.__d['need_login']
+            return need
+        except KeyError:
+            # 默认不需要登录，容易被爬虫检测到
+            return False
+
+    def save_need_login(self, need):
+        self.__d['need_login'] = need
+
     def get_recent_excel(self):
         try:
             excel = self.__d['recent_excel']

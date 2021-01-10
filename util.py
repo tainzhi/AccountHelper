@@ -1,5 +1,5 @@
 import os
-import re
+import shutil
 import sys
 from platform import system
 import logging
@@ -57,6 +57,15 @@ class Util:
         return os.path.join(root_dir, base_dir)
 
     @staticmethod
+    def remove_cropped_pictures():
+        """
+        删除 ./picture目录，等效于删除所有的截图
+        :return:
+        """
+        picture_dir = Util.get_save_picture_dir()
+        shutil.rmtree(picture_dir)
+
+    @staticmethod
     def get_config_dir():
         """
         配置保存目录 ./config/下
@@ -86,23 +95,23 @@ class Util:
         else:
             print('不支持的系统类型！')
             exit(-1)
-
-    @staticmethod
-    def get_haven_delead_company_code():
-        """
-        获取 ./picture 下当前已经获取的公司的图片，用于判断还有哪些公司没有获取，继续获取剩下的公司的图片截图
-        比如已经截取了图片 S00025_重庆民康实业有限公司.png
-        取出 S00025类似的数组， 返回， 方便继续获取还没有处理的公司
-        :return:
-        """
-        root_dir = Util.get_executable_path()
-        picture_dir = os.path.join(root_dir, 'picture')
-        dealed_company_code = []
-        for file in os.listdir(picture_dir):
-            matched = re.search("(\S*)_", file)
-            dealed_company_code.append(matched[1])
-        return dealed_company_code
-
+    #
+    # @staticmethod
+    # def get_haven_delead_company_code():
+    #     """
+    #     获取 ./picture 下当前已经获取的公司的图片，用于判断还有哪些公司没有获取，继续获取剩下的公司的图片截图
+    #     比如已经截取了图片 S00025_重庆民康实业有限公司.png
+    #     取出 S00025类似的数组， 返回， 方便继续获取还没有处理的公司
+    #     :return:
+    #     """
+    #     root_dir = Util.get_executable_path()
+    #     picture_dir = os.path.join(root_dir, 'picture')
+    #     dealed_company_code = []
+    #     for file in os.listdir(picture_dir):
+    #         matched = re.search("(\S*)_", file)
+    #         dealed_company_code.append(matched[1])
+    #     return dealed_company_code
+    #
     # @staticmethod
     # def get_log_config():
     #     """

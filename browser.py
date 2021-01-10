@@ -23,7 +23,8 @@ class TianYanCha:
     def __init__(self, window=None):
         self.__driver = webdriver.Chrome(self.__driver_location, service_args=['--ignore-ssl-errors=true', '--ssl-protocol=TLSv1'])
         self.__window = window
-        self.login()
+        if config.db.get_need_login():
+            self.login()
 
     def login(self):
         self.__logger.info("login")
@@ -192,7 +193,8 @@ class QiChaCha:
     def __init__(self, window=None):
         self.__driver = webdriver.Chrome(self.__driver_location)
         self.__window = window
-        self.login()
+        if config.db.get_need_login():
+            self.login()
 
     def login(self):
         self.__logger.info("login")
